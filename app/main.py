@@ -1,11 +1,18 @@
 from fastapi import FastAPI
 from db.supabase import create_supabase_client, Client
 from mangum import Mangum
+from dotenv import load_dotenv
+import os
 
-
-app = FastAPI()
 
 supabase: Client = create_supabase_client()
+load_dotenv()
+stage = os.getenv("STAGE")
+openapi_prefix = "" if stage == "local" else "/dev"
+
+app = FastAPI(
+    root_path=openapi_prefix,
+)
 
 
 @app.get("/")
@@ -17,6 +24,7 @@ async def root():
 async def get_current_caregiver():
     res = supabase.from_("users").select("*").execute()
     return res.data
+
 
 
 handler = Mangum(app)
