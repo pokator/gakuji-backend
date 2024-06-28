@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from db.supabase import create_supabase_client, Client
+from mangum import Mangum
+
 
 app = FastAPI()
 
@@ -15,3 +17,6 @@ async def root():
 async def get_current_caregiver():
     res = supabase.from_("users").select("*").execute()
     return res.data
+
+
+handler = Mangum(app)
