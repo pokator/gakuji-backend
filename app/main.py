@@ -4,7 +4,6 @@ from mangum import Mangum
 from dotenv import load_dotenv
 import os
 
-
 supabase: Client = create_supabase_client()
 load_dotenv()
 stage = os.getenv("STAGE")

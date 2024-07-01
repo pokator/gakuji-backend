@@ -7,6 +7,10 @@ name = "pypi"
 fastapi = "*"
 supabase = "*"
 mangum = "*"
+lyricsgenius = "*"
+spotipy = "*"
+jamdict = "*"
+pykakasi = "*"
 
 [dev-packages]
 
