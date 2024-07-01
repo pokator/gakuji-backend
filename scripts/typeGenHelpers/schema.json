@@ -1,464 +1,163 @@
 [
     {
-        "table_name": "Appointments",
-        "column_name": "appointment_date",
-        "udt_name": "text",
-        "data_type": "text",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Appointments",
+        "table_name": "List",
         "column_name": "created_at",
         "udt_name": "timestamptz",
         "data_type": "timestamp with time zone",
         "is_nullable": "NO"
     },
     {
-        "table_name": "Appointments",
+        "table_name": "List",
         "column_name": "id",
         "udt_name": "uuid",
         "data_type": "uuid",
         "is_nullable": "NO"
     },
     {
-        "table_name": "Appointments",
-        "column_name": "name",
+        "table_name": "List",
+        "column_name": "list_name",
+        "udt_name": "text",
+        "data_type": "text",
+        "is_nullable": "NO"
+    },
+    {
+        "table_name": "List",
+        "column_name": "type",
         "udt_name": "text",
         "data_type": "text",
         "is_nullable": "YES"
     },
     {
-        "table_name": "Caregiver",
-        "column_name": "age",
-        "udt_name": "int4",
-        "data_type": "integer",
+        "table_name": "List",
+        "column_name": "user_id",
+        "udt_name": "uuid",
+        "data_type": "uuid",
+        "is_nullable": "NO"
+    },
+    {
+        "table_name": "ListItem",
+        "column_name": "artist",
+        "udt_name": "text",
+        "data_type": "text",
         "is_nullable": "YES"
     },
     {
-        "table_name": "Caregiver",
+        "table_name": "ListItem",
         "column_name": "created_at",
         "udt_name": "timestamptz",
         "data_type": "timestamp with time zone",
         "is_nullable": "NO"
     },
     {
-        "table_name": "Caregiver",
-        "column_name": "email",
-        "udt_name": "varchar",
-        "data_type": "character varying",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Caregiver",
-        "column_name": "first_name",
-        "udt_name": "text",
-        "data_type": "text",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Caregiver",
+        "table_name": "ListItem",
         "column_name": "id",
         "udt_name": "uuid",
         "data_type": "uuid",
         "is_nullable": "NO"
     },
     {
-        "table_name": "Caregiver",
-        "column_name": "last_name",
-        "udt_name": "text",
-        "data_type": "text",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Caregiver",
-        "column_name": "patient_id",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Caregiver",
-        "column_name": "phone_number",
-        "udt_name": "varchar",
-        "data_type": "character varying",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Caregiver",
-        "column_name": "primary_caregiver",
-        "udt_name": "bool",
-        "data_type": "boolean",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Caregiver",
-        "column_name": "profile_picture",
-        "udt_name": "varchar",
-        "data_type": "character varying",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Caregiver",
-        "column_name": "relationship_to_patient",
-        "udt_name": "varchar",
-        "data_type": "character varying",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "CaregiverResourceRelation",
-        "column_name": "caregiver_id",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "CaregiverResourceRelation",
-        "column_name": "resource_id",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "DailyTracker",
-        "column_name": "additional_notes",
-        "udt_name": "text",
-        "data_type": "text",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "DailyTracker",
-        "column_name": "created_at",
-        "udt_name": "timestamptz",
-        "data_type": "timestamp with time zone",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "DailyTracker",
-        "column_name": "date",
-        "udt_name": "date",
-        "data_type": "date",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "DailyTracker",
-        "column_name": "id",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "DailyTracker",
-        "column_name": "medical_receptiveness",
-        "udt_name": "int4",
-        "data_type": "integer",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "DailyTracker",
-        "column_name": "patient_id",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "DailyTracker",
-        "column_name": "social_temperament",
-        "udt_name": "int4",
-        "data_type": "integer",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "GeneratePlans",
-        "column_name": "engagement",
-        "udt_name": "json",
-        "data_type": "json",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "GeneratePlans",
-        "column_name": "hygiene",
-        "udt_name": "json",
-        "data_type": "json",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "GeneratePlans",
-        "column_name": "maintenance",
-        "udt_name": "json",
-        "data_type": "json",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "GeneratePlans",
-        "column_name": "medications",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "GeneratePlans",
-        "column_name": "plan_id",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "GeneratePlans",
-        "column_name": "routine",
-        "udt_name": "json",
-        "data_type": "json",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "GeneratePlans",
-        "column_name": "sleep_quality",
-        "udt_name": "json",
-        "data_type": "json",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "GeneratePlans",
-        "column_name": "well_being",
-        "udt_name": "json",
-        "data_type": "json",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "MedicalHistory",
-        "column_name": "created_at",
-        "udt_name": "timestamptz",
-        "data_type": "timestamp with time zone",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "MedicalHistory",
-        "column_name": "diagnosis_history",
-        "udt_name": "jsonb",
-        "data_type": "jsonb",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "MedicalHistory",
-        "column_name": "id",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "Medications",
-        "column_name": "created_at",
-        "udt_name": "timestamptz",
-        "data_type": "timestamp with time zone",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "Medications",
-        "column_name": "description",
-        "udt_name": "text",
-        "data_type": "text",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Medications",
-        "column_name": "expiry",
-        "udt_name": "text",
-        "data_type": "text",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Medications",
-        "column_name": "frequency",
-        "udt_name": "text",
-        "data_type": "text",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Medications",
-        "column_name": "id",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "Medications",
-        "column_name": "is_completed",
-        "udt_name": "bool",
-        "data_type": "boolean",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Medications",
-        "column_name": "last_completion_date",
-        "udt_name": "text",
-        "data_type": "text",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Medications",
-        "column_name": "name",
-        "udt_name": "text",
-        "data_type": "text",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Medications",
-        "column_name": "next_usage_date",
-        "udt_name": "text",
-        "data_type": "text",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Patient",
-        "column_name": "birthdate",
-        "udt_name": "date",
-        "data_type": "date",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Patient",
-        "column_name": "created_at",
-        "udt_name": "timestamptz",
-        "data_type": "timestamp with time zone",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "Patient",
-        "column_name": "email",
-        "udt_name": "varchar",
-        "data_type": "character varying",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Patient",
-        "column_name": "first_name",
-        "udt_name": "text",
-        "data_type": "text",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Patient",
-        "column_name": "food_structure",
-        "udt_name": "json",
-        "data_type": "json",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Patient",
-        "column_name": "id",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "Patient",
-        "column_name": "last_name",
-        "udt_name": "varchar",
-        "data_type": "character varying",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Patient",
-        "column_name": "location",
-        "udt_name": "text",
-        "data_type": "text",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Patient",
-        "column_name": "medical_history_id",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Patient",
-        "column_name": "phone_number",
-        "udt_name": "varchar",
-        "data_type": "character varying",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "PatientAppointmentRelation",
-        "column_name": "appointment_id",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "PatientAppointmentRelation",
-        "column_name": "patient_id",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "PatientCaregiverRelation",
-        "column_name": "caregiver_id",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "PatientCaregiverRelation",
-        "column_name": "patient_id",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "PatientMedicationRelation",
-        "column_name": "medication_id",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "PatientMedicationRelation",
-        "column_name": "patient_id",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "Resources",
-        "column_name": "author",
-        "udt_name": "text",
-        "data_type": "text",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Resources",
-        "column_name": "created_at",
-        "udt_name": "timestamptz",
-        "data_type": "timestamp with time zone",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "Resources",
-        "column_name": "id",
-        "udt_name": "uuid",
-        "data_type": "uuid",
-        "is_nullable": "NO"
-    },
-    {
-        "table_name": "Resources",
-        "column_name": "name",
-        "udt_name": "text",
-        "data_type": "text",
-        "is_nullable": "YES"
-    },
-    {
-        "table_name": "Resources",
-        "column_name": "reading_time",
+        "table_name": "ListItem",
+        "column_name": "list_id",
         "udt_name": "int8",
         "data_type": "bigint",
         "is_nullable": "YES"
     },
     {
-        "table_name": "Resources",
-        "column_name": "tag",
-        "udt_name": "varchar",
-        "data_type": "character varying",
+        "table_name": "ListItem",
+        "column_name": "song",
+        "udt_name": "text",
+        "data_type": "text",
+        "is_nullable": "YES"
+    },
+    {
+        "table_name": "ListItem",
+        "column_name": "value",
+        "udt_name": "text",
+        "data_type": "text",
+        "is_nullable": "YES"
+    },
+    {
+        "table_name": "Song",
+        "column_name": "artist",
+        "udt_name": "text",
+        "data_type": "text",
+        "is_nullable": "NO"
+    },
+    {
+        "table_name": "Song",
+        "column_name": "created_at",
+        "udt_name": "timestamptz",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO"
+    },
+    {
+        "table_name": "Song",
+        "column_name": "hiragana_lyrics",
+        "udt_name": "json",
+        "data_type": "json",
+        "is_nullable": "YES"
+    },
+    {
+        "table_name": "Song",
+        "column_name": "id",
+        "udt_name": "uuid",
+        "data_type": "uuid",
+        "is_nullable": "NO"
+    },
+    {
+        "table_name": "Song",
+        "column_name": "lyrics",
+        "udt_name": "json",
+        "data_type": "json",
+        "is_nullable": "YES"
+    },
+    {
+        "table_name": "Song",
+        "column_name": "title",
+        "udt_name": "text",
+        "data_type": "text",
+        "is_nullable": "NO"
+    },
+    {
+        "table_name": "User",
+        "column_name": "created_at",
+        "udt_name": "timestamptz",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO"
+    },
+    {
+        "table_name": "User",
+        "column_name": "email",
+        "udt_name": "text",
+        "data_type": "text",
+        "is_nullable": "YES"
+    },
+    {
+        "table_name": "User",
+        "column_name": "first_name",
+        "udt_name": "text",
+        "data_type": "text",
+        "is_nullable": "YES"
+    },
+    {
+        "table_name": "User",
+        "column_name": "id",
+        "udt_name": "uuid",
+        "data_type": "uuid",
+        "is_nullable": "NO"
+    },
+    {
+        "table_name": "User",
+        "column_name": "last_name",
+        "udt_name": "text",
+        "data_type": "text",
+        "is_nullable": "YES"
+    },
+    {
+        "table_name": "User",
+        "column_name": "username",
+        "udt_name": "text",
+        "data_type": "text",
         "is_nullable": "YES"
     }
 ]
