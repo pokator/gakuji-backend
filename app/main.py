@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from db.supabase import create_supabase_client , Client
-from app.routers import auth
+from app.routers import auth, song
 from mangum import Mangum
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
@@ -40,5 +40,6 @@ app.add_middleware(
 
 
 app.include_router(auth.router)
+app.include_router(song.router)
 
 handler = Mangum(app)
