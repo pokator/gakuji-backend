@@ -2,7 +2,7 @@ from fastapi import Body, Depends, status, HTTPException, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from db.supabase import create_supabase_client
 from app.dbmodels import User
-from app.models import Token, CreateUser
+from app.models import Token, CreateUser, SpotifyAdd, ManualAdd
 from dotenv import load_dotenv
 import os
 from typing import Union
@@ -39,6 +39,7 @@ def load_kanji_data(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         return json.load(file)
 kanji_data = load_kanji_data('kanji.json')
+supabase = create_supabase_client()
 
 #gets the song from a given URI, returns artist and song of the track.
 def get_song(uri):
@@ -134,8 +135,56 @@ def process_tokenized_lines(lines):
 
 
 #need a route which takes in a spotify uri and adds the processed song to the database.
+@router.post("/add-song-spot")
+async def add_song_spot(spotifyItem: SpotifyAdd = None):
+    uri = spotifyItem.uri
+    if uri is None:
+        return {"message": "Missing information. Please try again."}
+    else:
+        artist, song = get_song(uri)
+        song_data = genius.search_song(song, artist)
+        lyrics = song_data.lyrics
+        cleaned_lyrics = clean_lyrics(lyrics)
+        lines = split_into_lines(cleaned_lyrics)
+        tokenized_lines, hiragana_lines = tokenize(lines)
+        kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
+        all_kanji_data = get_all_kanji_data(kanji_list)
+        word_mapping = process_tokenized_lines(tokenized_lines)
+        # hiragana_lyrics = " ".join(hiragana_lines)
+        response = supabase.table("Song").insert({"title": song, "artist": artist, "lyrics": cleaned_lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data}).execute()
+        return response
+    
 #need a route which takes in artist, song and, lyrics, processes the text, and adds the processed song to the database
+@router.post("/add-song-manual")
+async def add_song_manual(manual: ManualAdd):
+    title = manual.title
+    artist = manual.artist
+    lyrics = manual.lyrics
+    uuid = manual.uuid
+    if title is None or artist is None or lyrics is None or uuid is None:
+        return {"message": "Missing information. Please try again."}
+    else:
+        cleaned_lyrics = clean_lyrics(lyrics)
+        lines = split_into_lines(cleaned_lyrics)
+        tokenized_lines, hiragana_lines = tokenize(lines)
+        kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
+        all_kanji_data = get_all_kanji_data(kanji_list)
+        word_mapping = process_tokenized_lines(tokenized_lines)
+        response = supabase.table("Song").insert({"title": title, "artist": artist, "lyrics": cleaned_lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "uuid": uuid}).execute()
+        return response
+
 #need a route which provides a desired song from the database when requested. provides the lyrics and the mapping of word to idseq and kanji dictionary.
+@router.get("/get-song")
+async def get_song(title: str = None, artist: str = None, uuid: str = None):
+    if title is None or artist is None or uuid is None:
+        return {"message": "Missing information. Please try again."}
+    else:
+        # have access to title, artist, uuid
+        response = supabase.table("Song").select("lyrics, hiragana_lyrics, word_mapping").eq("uuid", uuid).eq("title", title).eq("artist", artist).execute()
+        if response["count"] == 0:
+            return {"message": "Song not found in database."}
+        else:
+            return response["data"][0]
 
 #need a route which looks up a particular idseq in jamdict.
 @router.get("/get-word")
@@ -166,10 +215,17 @@ async def get_word(idseq: str = None): #not sure about how to define
         return result
     else:
         return {"message": "No idseq provided"}
+    
+#need a route which provides the hiragana for a given song. MAYBE NOT
 
-
-#need a route which provides the hiragana for a given song.
 #need a route which provides a list of songs from the database when requested for the particular user.
+@router.get("/get-songs")
+async def get_songs():
+    response = supabase.table("Song").select("title, artist").eq("user_id", supabase.auth.get_user().user.id).execute()
+    if response["count"] == 0:
+        return {"message": "No songs found in database."}
+    else:
+        return response["data"]
 
 
 
