@@ -35,6 +35,8 @@ kakasi.setMode("K", "H")
 conv = kakasi.getConverter()
 CONST_KANJI = r'[㐀-䶵一-鿋豈-頻]'
 
+# print(os.listdir())
+
 def load_kanji_data(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         return json.load(file)
