@@ -46,7 +46,13 @@ def get_song(uri):
     track = sp.track(uri, market="JP")
     artist = track['artists'][0]['name']
     song = track['name']
-    return artist, song
+    image = track['album']['images'][0]['url']
+    return artist, song, image
+
+def get_image(artist, title):
+    query = f"track:{title} artist:{artist}"
+    track = sp.search(q=query, limit=1, offset=0, type="track", market="JP")
+    return track['tracks']['items'][0]['album']['images'][0]['url']
 
 
 # artist, song = get_song("https://open.spotify.com/track/3kUWZiVYJ4YQOl0u7Y1Og8?si=66716aec7c7447e0")
@@ -132,8 +138,6 @@ def process_tokenized_lines(lines):
                 word_dict[word] = word_info
     return word_dict
 
-
-
 #need a route which takes in a spotify uri and adds the processed song to the database.
 @router.post("/add-song-spot")
 async def add_song_spot(spotifyItem: SpotifyAdd = None):
@@ -141,7 +145,7 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None):
     if uri is None:
         return {"message": "Missing information. Please try again."}
     else:
-        artist, song = get_song(uri)
+        artist, song, image = get_song(uri)
         song_data = genius.search_song(song, artist)
         lyrics = song_data.lyrics
         cleaned_lyrics = clean_lyrics(lyrics)
@@ -150,8 +154,7 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None):
         kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
         all_kanji_data = get_all_kanji_data(kanji_list)
         word_mapping = process_tokenized_lines(tokenized_lines)
-        # hiragana_lyrics = " ".join(hiragana_lines)
-        response = supabase.table("Song").insert({"title": song, "artist": artist, "lyrics": cleaned_lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data}).execute()
+        response = supabase.table("Song").insert({"title": song, "artist": artist, "lyrics": cleaned_lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "image_url": image, "uuid": supabase.auth.get_user().user.id}).execute()
         return response
     
 #need a route which takes in artist, song and, lyrics, processes the text, and adds the processed song to the database
@@ -164,13 +167,14 @@ async def add_song_manual(manual: ManualAdd):
     if title is None or artist is None or lyrics is None or uuid is None:
         return {"message": "Missing information. Please try again."}
     else:
+        image_url = get_image(artist, title)
         cleaned_lyrics = clean_lyrics(lyrics)
         lines = split_into_lines(cleaned_lyrics)
         tokenized_lines, hiragana_lines = tokenize(lines)
         kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
         all_kanji_data = get_all_kanji_data(kanji_list)
         word_mapping = process_tokenized_lines(tokenized_lines)
-        response = supabase.table("Song").insert({"title": title, "artist": artist, "lyrics": cleaned_lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "uuid": uuid}).execute()
+        response = supabase.table("Song").insert({"title": title, "artist": artist, "lyrics": cleaned_lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "uuid": supabase.auth.get_user().user.id, "image_url": image_url}).execute()
         return response
 
 #need a route which provides a desired song from the database when requested. provides the lyrics and the mapping of word to idseq and kanji dictionary.
