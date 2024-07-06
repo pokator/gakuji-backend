@@ -138,7 +138,7 @@ def process_tokenized_lines(lines):
 #need a route which provides a desired song from the database when requested. provides the lyrics and the mapping of word to idseq and kanji dictionary.
 
 #need a route which looks up a particular idseq in jamdict.
-@router.get("/current-user")
+@router.get("/get-word")
 async def get_word(idseq: str = None): #not sure about how to define
     if idseq:
         word_result = jam.lookup("id#"+idseq).to_dict()['entries'][0]
