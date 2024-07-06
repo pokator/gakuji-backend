@@ -12,9 +12,9 @@ spotipy = "*"
 jamdict = "*"
 pykakasi = "*"
 fugashi = "*"
-jamdict-data = "*"
 unidic-lite = "*"
 wheel = "*"
+jamdict-data = "*"
 
 [dev-packages]
 
