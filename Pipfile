@@ -11,6 +11,9 @@ lyricsgenius = "*"
 spotipy = "*"
 jamdict = "*"
 pykakasi = "*"
+fugashi = "*"
+jamdict-data = "*"
+unidic-lite = "*"
 
 [dev-packages]
 
