@@ -24,6 +24,9 @@ RUN yum install ffmpeg libsm6 libxext6 python3-pip git -y
 # Copy the generated requirements.txt from the previous stage
 COPY --from=builder /app/requirements.txt .
 
+# Install the Wheel Dependency first
+RUN pip3 install wheel --target "${LAMBDA_TASK_ROOT}"
+
 # Install dependencies
 RUN pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
