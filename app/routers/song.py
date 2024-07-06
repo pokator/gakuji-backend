@@ -10,7 +10,7 @@ from lyricsgenius import Genius
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from jamdict import Jamdict
-import jamdict_data
+# import jamdict_data
 import re
 import fugashi
 import pykakasi
