@@ -15,6 +15,7 @@ fugashi = "*"
 unidic-lite = "*"
 wheel = "*"
 jamdict-data = "*"
+puchikarui = "*"
 
 [dev-packages]
 
