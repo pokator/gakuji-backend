@@ -34,8 +34,8 @@ COPY --from=builder /app/requirements.txt /app/
 # Copy all files from the builder stage to the current working directory in the final image
 COPY --from=builder /app /app
 
-# Install dependencies using only binary packages
-RUN pip3 install --only-binary=:all: -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
+# Install dependencies 
+RUN pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
 # Copy the entire application directory to the Lambda task root
 COPY ./ ${LAMBDA_TASK_ROOT}/
