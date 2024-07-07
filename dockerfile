@@ -4,9 +4,11 @@ FROM python:3.11 as builder
 # Install pipenv
 RUN pip3 install pipenv
 
-# Copy your Pipfile and Pipfile.lock
+# Set working directory
 WORKDIR /app
-COPY Pipfile Pipfile.lock ./
+
+# Copy all files from the current directory to the container
+COPY . ./
 
 # Generate requirements.txt
 RUN pipenv requirements > requirements.txt
@@ -14,6 +16,7 @@ RUN pipenv requirements > requirements.txt
 # Now, start the next stage of the Dockerfile to build your actual application image
 FROM public.ecr.aws/lambda/python:3.11
 
+# Set working directory
 WORKDIR /app
 
 # Update the system and install necessary packages
@@ -25,13 +28,17 @@ RUN yum update -y && \
 RUN pip3 install --upgrade pip && \
     pip3 install wheel
 
-# Copy the generated requirements.txt from the previous stage
-COPY --from=builder /app/requirements.txt .
+# Copy the generated requirements.txt from the builder stage
+COPY --from=builder /app/requirements.txt /app/
 
-# Install dependencies
-RUN pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
+# Copy all files from the builder stage to the current working directory in the final image
+COPY --from=builder /app /app
 
-# Continue with your application setup...
+# Install dependencies using only binary packages
+RUN pip3 install --only-binary=:all: -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
+
+# Copy the entire application directory to the Lambda task root
 COPY ./ ${LAMBDA_TASK_ROOT}/
 
+# Set the command to run your application
 CMD [ "app.main.handler" ]
