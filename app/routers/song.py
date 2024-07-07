@@ -10,15 +10,22 @@ from lyricsgenius import Genius
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from jamdict import Jamdict
-# import jamdict_data
+import jamdict_data
 import re
 import fugashi
 import pykakasi
 import json
+from app.routers.auth import get_current_user
 
 router = APIRouter(prefix="/song", tags=["song"])
 load_dotenv()
 stage = os.getenv("STAGE")
+oauth2_scheme = (
+    OAuth2PasswordBearer(tokenUrl="/auth/token")
+    if stage == "local"
+    else OAuth2PasswordBearer(tokenUrl="/dev/auth/token")
+)
+
 
 cid ='5edc552c91d8428cbcaf7eb1230a9526'
 secret ='9d3113c375c3436abb7caf696dd6e538'
@@ -87,7 +94,7 @@ def tokenize(lines):
     to_hiragana_list = []
     for line in lines:
         # tagged = tagger(line)
-        tagged_line = [word for word in tagger(line)]
+        tagged_line = [word.surface for word in tagger(line)]
         to_hiragana_list.append(conv.do(line))
         line_list.append(tagged_line)
     return line_list, to_hiragana_list
@@ -135,16 +142,16 @@ def process_tokenized_lines(lines):
     word_dict = {}
     for line in lines:
         for word in line:
-            word_info = get_word_info(word.surface)
+            word_info = get_word_info(word)
             if len(word_info) > 0:
                 word_dict[word] = word_info
     return word_dict
 
 #need a route which takes in a spotify uri and adds the processed song to the database.
 @router.post("/add-song-spot")
-async def add_song_spot(spotifyItem: SpotifyAdd = None):
+async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get_current_user)):
     uri = spotifyItem.uri
-    if uri is None:
+    if uri is None or user is None:
         return {"message": "Missing information. Please try again."}
     else:
         artist, song, image = get_song(uri)
@@ -156,17 +163,17 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None):
         kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
         all_kanji_data = get_all_kanji_data(kanji_list)
         word_mapping = process_tokenized_lines(tokenized_lines)
-        response = supabase.table("Song").insert({"title": song, "artist": artist, "lyrics": cleaned_lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "image_url": image, "uuid": supabase.auth.get_user().user.id}).execute()
+        response = supabase.table("SongData").insert({"title": song, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "image_url": image}).execute()
+        response = supabase.table("Song").insert({"title": song, "artist": artist, "uuid": supabase.auth.get_user().user.id}).execute()
         return response
     
 #need a route which takes in artist, song and, lyrics, processes the text, and adds the processed song to the database
 @router.post("/add-song-manual")
-async def add_song_manual(manual: ManualAdd):
+async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_user)):
     title = manual.title
     artist = manual.artist
     lyrics = manual.lyrics
-    uuid = manual.uuid
-    if title is None or artist is None or lyrics is None or uuid is None:
+    if title is None or artist is None or lyrics is None or user is None:
         return {"message": "Missing information. Please try again."}
     else:
         image_url = get_image(artist, title)
@@ -176,17 +183,19 @@ async def add_song_manual(manual: ManualAdd):
         kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
         all_kanji_data = get_all_kanji_data(kanji_list)
         word_mapping = process_tokenized_lines(tokenized_lines)
-        response = supabase.table("Song").insert({"title": title, "artist": artist, "lyrics": cleaned_lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "uuid": supabase.auth.get_user().user.id, "image_url": image_url}).execute()
+        # response = supabase.table("Song").insert({"title": title, "artist": artist, "lyrics": cleaned_lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "uuid": supabase.auth.get_user().user.id, "image_url": image_url}).execute()
+        response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
+        response = supabase.table("Song").insert({"title": song, "artist": artist, "uuid": supabase.auth.get_user().user.id}).execute()
         return response
 
 #need a route which provides a desired song from the database when requested. provides the lyrics and the mapping of word to idseq and kanji dictionary.
 @router.get("/get-song")
-async def get_song(title: str = None, artist: str = None, uuid: str = None):
-    if title is None or artist is None or uuid is None:
+async def get_song(title: str = None, artist: str = None, user: User = Depends(get_current_user)):
+    if title is None or artist is None or user is None:
         return {"message": "Missing information. Please try again."}
     else:
         # have access to title, artist, uuid
-        response = supabase.table("Song").select("lyrics, hiragana_lyrics, word_mapping").eq("uuid", uuid).eq("title", title).eq("artist", artist).execute()
+        response = supabase.table("SongData").select("lyrics, hiragana_lyrics, word_mapping").eq("title", title).eq("artist", artist).execute()
         if response["count"] == 0:
             return {"message": "Song not found in database."}
         else:
@@ -194,7 +203,9 @@ async def get_song(title: str = None, artist: str = None, uuid: str = None):
 
 #need a route which looks up a particular idseq in jamdict.
 @router.get("/get-word")
-async def get_word(idseq: str = None): #not sure about how to define
+async def get_word(idseq: str = None, user: User = Depends(get_current_user)): #not sure about how to define
+    if user is None:
+        return {"message": "User not found."}
     if idseq:
         word_result = jam.lookup("id#"+idseq).to_dict()['entries'][0]
         furigana = word_result['kana'][0]['text']
@@ -226,8 +237,8 @@ async def get_word(idseq: str = None): #not sure about how to define
 
 #need a route which provides a list of songs from the database when requested for the particular user.
 @router.get("/get-songs")
-async def get_songs():
-    response = supabase.table("Song").select("title, artist").eq("user_id", supabase.auth.get_user().user.id).execute()
+async def get_songs(user: User = Depends(get_current_user)):
+    response = supabase.table("Song").select("title, artist, SongData(image_url)").eq("user_id", supabase.auth.get_user().user.id).execute()
     if response["count"] == 0:
         return {"message": "No songs found in database."}
     else:
