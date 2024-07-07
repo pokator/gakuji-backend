@@ -185,7 +185,7 @@ async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_us
         word_mapping = process_tokenized_lines(tokenized_lines)
         # response = supabase.table("Song").insert({"title": title, "artist": artist, "lyrics": cleaned_lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "uuid": supabase.auth.get_user().user.id, "image_url": image_url}).execute()
         response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
-        response = supabase.table("Song").insert({"title": song, "artist": artist, "uuid": supabase.auth.get_user().user.id}).execute()
+        response = supabase.table("Song").insert({"title": title, "artist": artist, "uuid": supabase.auth.get_user().user.id}).execute()
         return response
 
 #need a route which provides a desired song from the database when requested. provides the lyrics and the mapping of word to idseq and kanji dictionary.

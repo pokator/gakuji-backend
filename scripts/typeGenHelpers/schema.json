@@ -106,9 +106,16 @@
     },
     {
         "table_name": "Song",
+        "column_name": "image_url",
+        "udt_name": "text",
+        "data_type": "text",
+        "is_nullable": "YES"
+    },
+    {
+        "table_name": "Song",
         "column_name": "lyrics",
-        "udt_name": "json",
-        "data_type": "json",
+        "udt_name": "jsonb",
+        "data_type": "jsonb",
         "is_nullable": "YES"
     },
     {
@@ -117,6 +124,69 @@
         "udt_name": "text",
         "data_type": "text",
         "is_nullable": "NO"
+    },
+    {
+        "table_name": "Song",
+        "column_name": "word_mapping",
+        "udt_name": "jsonb",
+        "data_type": "jsonb",
+        "is_nullable": "YES"
+    },
+    {
+        "table_name": "SongData",
+        "column_name": "artist",
+        "udt_name": "text",
+        "data_type": "text",
+        "is_nullable": "NO"
+    },
+    {
+        "table_name": "SongData",
+        "column_name": "created_at",
+        "udt_name": "timestamptz",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO"
+    },
+    {
+        "table_name": "SongData",
+        "column_name": "hiragana_lyrics",
+        "udt_name": "jsonb",
+        "data_type": "jsonb",
+        "is_nullable": "YES"
+    },
+    {
+        "table_name": "SongData",
+        "column_name": "image_url",
+        "udt_name": "text",
+        "data_type": "text",
+        "is_nullable": "YES"
+    },
+    {
+        "table_name": "SongData",
+        "column_name": "kanji_data",
+        "udt_name": "jsonb",
+        "data_type": "jsonb",
+        "is_nullable": "YES"
+    },
+    {
+        "table_name": "SongData",
+        "column_name": "lyrics",
+        "udt_name": "jsonb",
+        "data_type": "jsonb",
+        "is_nullable": "YES"
+    },
+    {
+        "table_name": "SongData",
+        "column_name": "title",
+        "udt_name": "text",
+        "data_type": "text",
+        "is_nullable": "NO"
+    },
+    {
+        "table_name": "SongData",
+        "column_name": "word_mapping",
+        "udt_name": "jsonb",
+        "data_type": "jsonb",
+        "is_nullable": "YES"
     },
     {
         "table_name": "User",

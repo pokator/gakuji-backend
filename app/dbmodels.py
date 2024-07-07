@@ -28,8 +28,20 @@ class Song(BaseModel):
     created_at: datetime
     hiragana_lyrics: Optional[dict] = None
     id: str
+    image_url: Optional[str] = None
     lyrics: Optional[dict] = None
     title: str
+    word_mapping: Optional[dict] = None
+
+class SongData(BaseModel):
+    artist: str
+    created_at: datetime
+    hiragana_lyrics: Optional[dict] = None
+    image_url: Optional[str] = None
+    kanji_data: Optional[dict] = None
+    lyrics: Optional[dict] = None
+    title: str
+    word_mapping: Optional[dict] = None
 
 class User(BaseModel):
     created_at: datetime
