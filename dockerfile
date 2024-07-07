@@ -1,4 +1,3 @@
-
 # Start with a Python image that has pipenv installed
 FROM python:3.11 as builder
 
@@ -17,18 +16,22 @@ FROM public.ecr.aws/lambda/python:3.11
 
 WORKDIR /app
 
-RUN yum update -y
-RUN yum update -y python3 curl libcom_err ncurses expat libblkid libuuid libmount
-RUN yum install ffmpeg libsm6 libxext6 python3-pip git -y
+# Update the system and install necessary packages
+RUN yum update -y && \
+    yum install -y python3 curl libcom_err ncurses expat libblkid libuuid libmount ffmpeg libsm6 libxext6 git && \
+    yum clean all
+
+# Upgrade pip and install wheel
+RUN pip3 install --upgrade pip && \
+    pip3 install wheel
 
 # Copy the generated requirements.txt from the previous stage
 COPY --from=builder /app/requirements.txt .
 
 # Install dependencies
-RUN pip3 install wheel --target "${LAMBDA_TASK_ROOT}" && pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
+RUN pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
 # Continue with your application setup...
 COPY ./ ${LAMBDA_TASK_ROOT}/
-
 
 CMD [ "app.main.handler" ]
