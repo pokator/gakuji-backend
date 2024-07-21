@@ -268,6 +268,16 @@ async def get_songs(user: User = Depends(get_current_user)):
         return response.data
 
 
+@router.get("/get-global-songs")
+async def get_global_songs(limit: int = 10, offset: int = 0, user: User = Depends(get_current_user)):
+    if limit == None or offset == None:
+        return {"message": "Missing information. Please try again."}
+    else:
+        response = supabase.table("Song").select("title, artist, SongData(image_url)").limit(limit).offset(offset).order("created_at", desc=True).execute()
+        return response.data
+
+
+
 
 # cleaned_result = clean_lyrics(result)
 # print(cleaned_result)
