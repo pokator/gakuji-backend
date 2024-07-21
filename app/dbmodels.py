@@ -19,8 +19,8 @@ class ListItem(BaseModel):
     artist: Optional[str] = None
     created_at: datetime
     id: str
-    list_id: Optional[int] = None
-    song: Optional[str] = None
+    list_id: Optional[str] = None
+    title: Optional[str] = None
     value: Optional[str] = None
 
 class Song(BaseModel):

@@ -20,3 +20,13 @@ class ManualAdd(BaseModel):
     artist: str
     uuid: str | None = None
     lyrics: str
+    
+class WordAdd(BaseModel):
+    word: str
+    title: str
+    artist: str
+    list_id: str | None = None
+    
+class ListAdd(BaseModel):
+    list_name: str
+    type: str

@@ -148,6 +148,34 @@ def process_tokenized_lines(lines):
                 word_dict[word] = word_info
     return word_dict
 
+def create_word_return(idseq):
+    word_result = jam.lookup("id#"+idseq).to_dict()['entries'][0]
+    word = word_result['kanji'][0]['text']
+    furigana = word_result['kana'][0]['text']
+    romaji = kakasi.convert(furigana)[0]["hepburn"]
+    word_properties = []
+    # all definitions availabile for this ID
+    for sense in word_result['senses']:
+        pos = sense['pos'] #part of speech(es), LIST
+        definition = [] #isolating the defintions, LIST
+        for sense_gloss in sense["SenseGloss"]:
+            definition.append(sense_gloss["text"])
+        word_property = {
+            "pos": pos,
+            "defintion": definition
+        }
+        word_properties.append(word_property)
+        
+    result = {
+        "word": word,
+        "furigana" : furigana,
+        "romaji": romaji,
+        "definitions": word_properties
+    }
+    
+    return result
+    
+
 #need a route which takes in a spotify uri and adds the processed song to the database.
 @router.post("/add-song-spot")
 async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get_current_user)):
@@ -219,30 +247,10 @@ async def get_song(title: str = None, artist: str = None, user: User = Depends(g
 #need a route which looks up a particular idseq in jamdict.
 @router.get("/get-word")
 async def get_word(idseq: str = None, user: User = Depends(get_current_user)): #not sure about how to define
-    if user is None:
+    if user is None or idseq is None:
         return {"message": "User not found."}
     if idseq:
-        word_result = jam.lookup("id#"+idseq).to_dict()['entries'][0]
-        furigana = word_result['kana'][0]['text']
-        romaji = kakasi.convert(furigana)[0]["hepburn"]
-        word_properties = []
-        # all definitions availabile for this ID
-        for sense in word_result['senses']:
-            pos = sense['pos'] #part of speech(es), LIST
-            definition = [] #isolating the defintions, LIST
-            for sense_gloss in sense["SenseGloss"]:
-                definition.append(sense_gloss["text"])
-            word_property = {
-                "pos": pos,
-                "defintion": definition
-            }
-            word_properties.append(word_property)
-            
-        result = {
-            "furigana" : furigana,
-            "romaji": romaji,
-            "definitions": word_properties
-        }
+        result = create_word_return(idseq)
         
         return result
     else:

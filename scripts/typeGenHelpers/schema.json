@@ -58,13 +58,13 @@
     {
         "table_name": "ListItem",
         "column_name": "list_id",
-        "udt_name": "int8",
-        "data_type": "bigint",
+        "udt_name": "uuid",
+        "data_type": "uuid",
         "is_nullable": "YES"
     },
     {
         "table_name": "ListItem",
-        "column_name": "song",
+        "column_name": "title",
         "udt_name": "text",
         "data_type": "text",
         "is_nullable": "YES"
