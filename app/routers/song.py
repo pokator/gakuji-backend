@@ -224,10 +224,14 @@ async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_us
                 lines = split_into_lines(cleaned_lyrics)
                 tokenized_lines, hiragana_lines = tokenize(lines)
                 kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
-                all_kanji_data = get_all_kanji_data(kanji_list)
+                all_kanji_data = get_all_kanji_data(kanji_list)        
+                # call long running SQS to process tokenized lines and add it to the database
+                response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
+            #   This is done in the other longrunning function 
                 word_mapping = process_tokenized_lines(tokenized_lines)
+
                 # response = supabase.table("Song").insert({"title": title, "artist": artist, "lyrics": cleaned_lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "uuid": supabase.auth.get_user().user.id, "image_url": image_url}).execute()
-                response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
+                # response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
             response = supabase.table("Song").insert({"title": title, "artist": artist, "id": user.id}).execute()
             return response
 
