@@ -16,10 +16,12 @@ import fugashi
 import pykakasi
 import json
 from app.routers.auth import get_current_user
+import boto3
 
 router = APIRouter(prefix="/song", tags=["song"])
 load_dotenv()
 stage = os.getenv("STAGE")
+sqs_url = os.getenv("QUEUE_URL")
 oauth2_scheme = (
     OAuth2PasswordBearer(tokenUrl="/auth/token")
     if stage == "local"
@@ -41,6 +43,7 @@ kakasi.setMode("J", "H")
 kakasi.setMode("K", "H")
 conv = kakasi.getConverter()
 CONST_KANJI = r'[㐀-䶵一-鿋豈-頻]'
+sqs = boto3.client('sqs')
 
 # print(os.listdir())
 
@@ -198,8 +201,14 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
                 tokenized_lines, hiragana_lines = tokenize(lines)
                 kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
                 all_kanji_data = get_all_kanji_data(kanji_list)
+                
+                response = supabase.table("SongData").insert({"title": song, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image}).execute()
                 word_mapping = process_tokenized_lines(tokenized_lines)
-                response = supabase.table("SongData").insert({"title": song, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "image_url": image}).execute()
+                sqs = boto3.client('sqs')
+                sqs.send_message(
+                    QueueUrl=sqs_url,
+                    MessageBody=word_mapping
+                )
             response = supabase.table("Song").insert({"title": song, "artist": artist, "id": user.id}).execute()
             return response
     
@@ -229,7 +238,11 @@ async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_us
                 response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
             #   This is done in the other longrunning function 
                 word_mapping = process_tokenized_lines(tokenized_lines)
-
+                sqs = boto3.client('sqs')
+                sqs.send_message(
+                    QueueUrl=sqs_url,
+                    MessageBody=word_mapping
+                )
                 # response = supabase.table("Song").insert({"title": title, "artist": artist, "lyrics": cleaned_lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "uuid": supabase.auth.get_user().user.id, "image_url": image_url}).execute()
                 # response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
             response = supabase.table("Song").insert({"title": title, "artist": artist, "id": user.id}).execute()

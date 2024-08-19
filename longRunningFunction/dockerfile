@@ -5,7 +5,7 @@ FROM python:3.11 as builder
 RUN pip3 install pipenv
 
 # Set working directory
-WORKDIR /app
+WORKDIR /
 
 # Copy all files from the current directory to the container
 COPY . ./
