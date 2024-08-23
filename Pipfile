@@ -16,6 +16,7 @@ unidic-lite = "*"
 wheel = "*"
 jamdict-data = "*"
 puchikarui = "*"
+boto3 = "*"
 
 [dev-packages]
 

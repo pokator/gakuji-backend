@@ -34,6 +34,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     try:
 
         data = supabase.auth.get_user(token)
+        
         user_id = data.user.id
 
         # First, try to find the user in the Caregiver table
