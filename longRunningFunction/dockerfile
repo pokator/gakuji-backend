@@ -17,7 +17,7 @@ RUN pipenv requirements > requirements.txt
 FROM public.ecr.aws/lambda/python:3.11
 
 # Set working directory
-WORKDIR /app
+WORKDIR /
 
 # Update the system and install necessary packages
 RUN yum update -y && \
@@ -29,10 +29,10 @@ RUN pip3 install --upgrade pip && \
     pip3 install wheel
 
 # Copy the generated requirements.txt from the builder stage
-COPY --from=builder /app/requirements.txt /app/
+COPY --from=builder ./requirements.txt ./
 
 # Copy all files from the builder stage to the current working directory in the final image
-COPY --from=builder /app /app
+COPY --from=builder ./ ./
 
 # Install dependencies 
 RUN pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
@@ -41,4 +41,4 @@ RUN pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 COPY ./ ${LAMBDA_TASK_ROOT}/
 
 # Set the command to run your application
-CMD [ "app.main.handler" ]
+CMD [ "main.process_lines" ]

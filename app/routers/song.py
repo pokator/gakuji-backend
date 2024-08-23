@@ -204,10 +204,13 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
                 
                 response = supabase.table("SongData").insert({"title": song, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image}).execute()
                 word_mapping = process_tokenized_lines(tokenized_lines)
+                
+                body = {"song": song, "artist": artist, "word_mapping": word_mapping, "token": supabase.auth.get_session().access_token}
+                
                 sqs = boto3.client('sqs')
                 sqs.send_message(
                     QueueUrl=sqs_url,
-                    MessageBody=word_mapping
+                    MessageBody=body
                 )
             response = supabase.table("Song").insert({"title": song, "artist": artist, "id": user.id}).execute()
             return response
@@ -238,10 +241,12 @@ async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_us
                 response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
             #   This is done in the other longrunning function 
                 word_mapping = process_tokenized_lines(tokenized_lines)
+                body = {"song": title, "artist": artist, "word_mapping": word_mapping, "uuid": supabase.auth.get_user().user.id}
+
                 sqs = boto3.client('sqs')
                 sqs.send_message(
                     QueueUrl=sqs_url,
-                    MessageBody=word_mapping
+                    MessageBody=body
                 )
                 # response = supabase.table("Song").insert({"title": title, "artist": artist, "lyrics": cleaned_lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "uuid": supabase.auth.get_user().user.id, "image_url": image_url}).execute()
                 # response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "image_url": image_url}).execute()

@@ -26,6 +26,12 @@ jobs:
         run: docker tag gakuji-api:latest 533267207624.dkr.ecr.us-east-2.amazonaws.com/gakuji-api:latest
       - name: Push Docker image
         run: docker push 533267207624.dkr.ecr.us-east-2.amazonaws.com/gakuji-api:latest
+      - name: Build Docker Image for process-lines
+        run: docker build -t process-lines ./longRunningFunction
+      - name: Tag Docker image for process-lines
+        run: docker tag process-lines:latest 533267207624.dkr.ecr.us-east-2.amazonaws.com/process-lines:latest
+      - name: Push Docker image for process-lines
+        run: docker push 533267207624.dkr.ecr.us-east-2.amazonaws.com/process-lines:latest
 
 
       - name: Update Lambda function code
