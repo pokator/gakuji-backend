@@ -15,7 +15,7 @@ import re
 import fugashi
 import pykakasi
 import json
-from app.routers.auth import get_current_user
+from app.routers.auth import get_current_user, get_current_session
 import boto3
 
 router = APIRouter(prefix="/song", tags=["song"])
@@ -43,7 +43,11 @@ kakasi.setMode("J", "H")
 kakasi.setMode("K", "H")
 conv = kakasi.getConverter()
 CONST_KANJI = r'[㐀-䶵一-鿋豈-頻]'
-sqs = boto3.client('sqs')
+aws_session = boto3.Session(
+    aws_access_key_id=os.getenv("AWS_SERVER_PUBLIC_KEY"),
+    aws_secret_access_key=os.getenv("AWS_SERVER_SECRET_KEY"),
+    region_name="us-east-2"
+)
 
 # print(os.listdir())
 
@@ -133,23 +137,23 @@ def get_all_kanji_data(kanji_list):
         all_kanji_data[kanji] = data
     return all_kanji_data
 
-#gets an ID for a particular word in the lyrics.
-def get_word_info(word):
-    result = jam.lookup(word)
-    word_info = []
-    for entry in result.entries[:3]:  # Include up to 3 entries
-        word_info.append(entry.idseq)
-    return word_info
+# #gets an ID for a particular word in the lyrics.
+# def get_word_info(word):
+#     result = jam.lookup(word)
+#     word_info = []
+#     for entry in result.entries[:3]:  # Include up to 3 entries
+#         word_info.append(entry.idseq)
+#     return word_info
 
-#getting the word info for all words in the lyrics
-def process_tokenized_lines(lines):
-    word_dict = {}
-    for line in lines:
-        for word in line:
-            word_info = get_word_info(word)
-            if len(word_info) > 0:
-                word_dict[word] = word_info
-    return word_dict
+# #getting the word info for all words in the lyrics
+# def process_tokenized_lines(lines):
+#     word_dict = {}
+#     for line in lines:
+#         for word in line:
+#             word_info = get_word_info(word)
+#             if len(word_info) > 0:
+#                 word_dict[word] = word_info
+#     return word_dict
 
 def create_word_return(idseq):
     word_result = jam.lookup("id#"+idseq).to_dict()['entries'][0]
@@ -181,8 +185,11 @@ def create_word_return(idseq):
 
 #need a route which takes in a spotify uri and adds the processed song to the database.
 @router.post("/add-song-spot")
-async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get_current_user)):
+async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get_current_user), session = Depends(get_current_session)):
     uri = spotifyItem.uri
+    print(uri)
+    print(user)
+    print(session)
     if uri is None or user is None:
         return {"message": "Missing information. Please try again."}
     else:
@@ -203,14 +210,16 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
                 all_kanji_data = get_all_kanji_data(kanji_list)
                 
                 response = supabase.table("SongData").insert({"title": song, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image}).execute()
-                word_mapping = process_tokenized_lines(tokenized_lines)
+                # word_mapping = process_tokenized_lines(tokenized_lines)
                 
-                body = {"song": song, "artist": artist, "word_mapping": word_mapping, "token": supabase.auth.get_session().access_token}
+                body = {"song": song, "artist": artist, "word_mapping": tokenized_lines, "token": session.access_token}
+                print(body)
                 
-                sqs = boto3.client('sqs')
-                sqs.send_message(
-                    QueueUrl=sqs_url,
-                    MessageBody=body
+                sqs = aws_session.resource('sqs')
+                queue = sqs.Queue(sqs_url)
+                queue.send_message(
+                    # QueueUrl=sqs_url,
+                    MessageBody=str(body)
                 )
             response = supabase.table("Song").insert({"title": song, "artist": artist, "id": user.id}).execute()
             return response
@@ -240,10 +249,10 @@ async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_us
                 # call long running SQS to process tokenized lines and add it to the database
                 response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
             #   This is done in the other longrunning function 
-                word_mapping = process_tokenized_lines(tokenized_lines)
-                body = {"song": title, "artist": artist, "word_mapping": word_mapping, "uuid": supabase.auth.get_user().user.id}
+                # word_mapping = process_tokenized_lines(tokenized_lines)
+                body = {"song": title, "artist": artist, "word_mapping": tokenized_lines, "uuid": supabase.auth.get_user().user.id}
 
-                sqs = boto3.client('sqs')
+                sqs = boto3.client('sqs', region_name='us-east-2')
                 sqs.send_message(
                     QueueUrl=sqs_url,
                     MessageBody=body
