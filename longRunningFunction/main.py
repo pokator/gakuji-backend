@@ -67,7 +67,6 @@ def process_tokenized_lines(lines):
 
 def process_lines(event, context):
     try:
-        
         for record in event['Records']:
             body = json.loads(record['body'])
             tokenized_lines = body['word_mapping']
