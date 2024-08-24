@@ -226,7 +226,7 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
     
 #need a route which takes in artist, song and, lyrics, processes the text, and adds the processed song to the database
 @router.post("/add-song-manual")
-async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_user)):
+async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_user), session = Depends(get_current_session)):
     title = manual.title
     artist = manual.artist
     lyrics = manual.lyrics
@@ -250,12 +250,22 @@ async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_us
                 response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
             #   This is done in the other longrunning function 
                 # word_mapping = process_tokenized_lines(tokenized_lines)
-                body = {"song": title, "artist": artist, "word_mapping": tokenized_lines, "uuid": supabase.auth.get_user().user.id}
+                # body = {"song": title, "artist": artist, "word_mapping": tokenized_lines, "uuid": supabase.auth.get_user().user.id}
 
-                sqs = boto3.client('sqs', region_name='us-east-2')
-                sqs.send_message(
-                    QueueUrl=sqs_url,
-                    MessageBody=body
+                # sqs = boto3.client('sqs', region_name='us-east-2')
+                # sqs.send_message(
+                #     QueueUrl=sqs_url,
+                #     MessageBody=body
+                # )
+                
+                body = {"song": title, "artist": artist, "word_mapping": tokenized_lines, "token": session.access_token}
+                print(body)
+                
+                sqs = aws_session.resource('sqs')
+                queue = sqs.Queue(sqs_url)
+                queue.send_message(
+                    # QueueUrl=sqs_url,
+                    MessageBody=str(body)
                 )
                 # response = supabase.table("Song").insert({"title": title, "artist": artist, "lyrics": cleaned_lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "uuid": supabase.auth.get_user().user.id, "image_url": image_url}).execute()
                 # response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
