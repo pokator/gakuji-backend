@@ -18,6 +18,7 @@ jamdict-data = "*"
 puchikarui = "*"
 boto3 = "*"
 python-dotenv = "*"
+python-multipart = "*"
 
 [dev-packages]
 
