@@ -1,44 +1,62 @@
-# Start with a Python image that has pipenv installed
-FROM python:3.11 as builder
+# # Start with a Python image that has pipenv installed
+# FROM python:3.11 as builder
 
-# Install pipenv
-RUN pip3 install pipenv
+# # Install pipenv
+# RUN pip3 install pipenv
 
-# Set working directory
-WORKDIR /longRunningFunction
+# # Set working directory
+# WORKDIR /longRunningFunction
 
-# Copy all files from the current directory to the container
-COPY . ./
+# # Copy all files from the current directory to the container
+# COPY . ./
 
-# Generate requirements.txt
-RUN pipenv requirements > requirements.txt
+# # Generate requirements.txt
+# RUN pipenv requirements > requirements.txt
 
-# Now, start the next stage of the Dockerfile to build your actual application image
+# # Now, start the next stage of the Dockerfile to build your actual application image
+# FROM public.ecr.aws/lambda/python:3.11
+
+# # Set working directory
+# WORKDIR /longRunningFunction
+
+# # Update the system and install necessary packages
+# RUN yum update -y && \
+#     yum install -y python3 curl libcom_err ncurses expat libblkid libuuid libmount ffmpeg libsm6 libxext6 git && \
+#     yum clean all
+
+# # Upgrade pip and install wheel
+# RUN pip3 install --upgrade pip && \
+#     pip3 install wheel
+
+# # Copy the generated requirements.txt from the builder stage
+# COPY --from=builder /longRunningFunction/requirements.txt /longRunningFunction/
+
+# # Copy all files from the builder stage to the current working directory in the final image
+# COPY --from=builder /longRunningFunction /longRunningFunction
+
+# # Install dependencies 
+# RUN pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
+
+# # Copy the entire application directory to the Lambda task root
+# COPY ./ ${LAMBDA_TASK_ROOT}/
+
+# # Set the command to run your application
+# CMD [ "main.process_lines" ]
+
+# Use the official AWS Lambda Python base image
 FROM public.ecr.aws/lambda/python:3.11
 
 # Set working directory
-WORKDIR /longRunningFunction
+WORKDIR /var/task
 
-# Update the system and install necessary packages
-RUN yum update -y && \
-    yum install -y python3 curl libcom_err ncurses expat libblkid libuuid libmount ffmpeg libsm6 libxext6 git && \
-    yum clean all
+# Copy Pipfile and Pipfile.lock
+COPY Pipfile* ./
 
-# Upgrade pip and install wheel
-RUN pip3 install --upgrade pip && \
-    pip3 install wheel
-
-# Copy the generated requirements.txt from the builder stage
-COPY --from=builder /longRunningFunction/requirements.txt /longRunningFunction/
-
-# Copy all files from the builder stage to the current working directory in the final image
-COPY --from=builder /longRunningFunction /longRunningFunction
-
-# Install dependencies 
-RUN pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
+# Install pipenv and python dependencies within Lambda environment
+RUN pip install pipenv && pipenv install --deploy
 
 # Copy the entire application directory to the Lambda task root
-COPY ./ ${LAMBDA_TASK_ROOT}/
+COPY . .
 
-# Set the command to run your application
+# Set the CMD to your handler (could be in any file)
 CMD [ "main.process_lines" ]
