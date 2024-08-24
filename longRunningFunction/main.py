@@ -66,23 +66,29 @@ def process_tokenized_lines(lines):
     return word_dict
 
 def process_lines(event, context):
-    for record in event['Records']:
-        body = json.loads(record['body'])
-        tokenized_lines = body['word_mapping']
-        artist = body['artist']
-        song = body['song']
-        token = body['token']
-        # Perform the long-running task
-        # Update the database
-        word_mapping = process_tokenized_lines(tokenized_lines)
-        supabase: Client = create_client(api_url, key)
-        supabase.auth.set_session(token)
-        response = supabase.table("SongData").update({"word_mapping": word_mapping}).eq("title", song).eq("artist", artist).execute()
-        
-    return {
-        'statusCode': 200,
-        'body': json.dumps('Long-running task completed successfully.')
-    }
+    try:
+        for record in event['Records']:
+            body = json.loads(record['body'])
+            tokenized_lines = body['word_mapping']
+            artist = body['artist']
+            song = body['song']
+            token = body['token']
+            # Perform the long-running task
+            # Update the database
+            word_mapping = process_tokenized_lines(tokenized_lines)
+            supabase: Client = create_client(api_url, key)
+            supabase.auth.set_session(token)
+            response = supabase.table("SongData").update({"word_mapping": word_mapping}).eq("title", song).eq("artist", artist).execute()
+            
+        return {
+            'statusCode': 200,
+            'body': json.dumps('Long-running task completed successfully.')
+        }
+    except Exception as e:
+        return {
+            'statusCode': 400,
+            'body': json.dumps('Long-running task failed with error: ' + str(e))
+        }
     
     #upon completion update the database with the word_mapping
     

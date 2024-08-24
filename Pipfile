@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 fastapi = "*"
-supabase = "*"
+supabase = "2.6.0"
 mangum = "*"
 lyricsgenius = "*"
 spotipy = "*"

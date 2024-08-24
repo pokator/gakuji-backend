@@ -18,11 +18,6 @@ oauth2_scheme = (
 )
 supabase = create_supabase_client()
 
-
-
-
-
-
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     credential_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -34,8 +29,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     try:
 
         data = supabase.auth.get_user(token)
-        
         user_id = data.user.id
+        print(supabase.auth.get_session())
 
         # First, try to find the user in the Caregiver table
         user = (
@@ -49,6 +44,15 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         print(e)  # Handle exceptions appropriately
         raise credential_exception
 
+async def get_current_session(token: str = Depends(oauth2_scheme)):
+    credential_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    data = supabase.auth.get_user(token)
+    print(supabase.auth.get_session())
+    return supabase.auth.get_session()
 
 @router.get("/current-user")
 async def read_users_me(current_user: User = Depends(get_current_user)):
@@ -97,3 +101,6 @@ async def set_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     print(data.session.access_token)
     supabase.auth.set_session(data.session.access_token, data.session.refresh_token)
     return {"access_token": data.session.access_token, "token_type": "bearer"}
+
+def return_session():
+    return supabase.auth.get_session()

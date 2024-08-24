@@ -41,6 +41,13 @@ jobs:
             --image-uri 533267207624.dkr.ecr.us-east-2.amazonaws.com/gakuji-api:latest \
             --region "us-east-2"
 
+      - name: Update process-lines Lambda function code
+        run: |
+          aws lambda update-function-code \
+          --function-name process_lines \
+          --image-uri 533267207624.dkr.ecr.us-east-2.amazonaws.com/process-lines:latest  \
+          --region "us-east-2"
+
       - name: Wait for lambda to complete update
         run: bash ./scripts/wait_for_lambda.sh gakuji-api
       - name: Health Check API
