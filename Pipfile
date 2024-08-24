@@ -17,6 +17,7 @@ wheel = "*"
 jamdict-data = "*"
 puchikarui = "*"
 boto3 = "*"
+python-dotenv = "*"
 
 [dev-packages]
 

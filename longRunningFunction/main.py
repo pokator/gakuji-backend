@@ -8,7 +8,6 @@ from supabase import Client, create_client
 from dotenv import load_dotenv
 from functools import wraps
 
-
 load_dotenv()
 
 api_url: str = os.getenv("SUPABASE_URL")
