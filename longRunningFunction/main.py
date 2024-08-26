@@ -70,7 +70,7 @@ def process_tokenized_lines(lines):
     print(f"Word dictionary: {word_dict}")
     return word_dict
 
-def process_lines(event, context):
+def lambda_handler(event, context):
     print(f"Processing event: {event}")
     try:
         for record in event['Records']:
