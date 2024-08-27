@@ -20,12 +20,26 @@ jobs:
             aws-region: "us-east-2"
       - name: Login to Amazon ECR
         run: aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 533267207624.dkr.ecr.us-east-2.amazonaws.com
-      # - name: Build Docker image
-      #   run: docker build -t gakuji-api .
-      # - name: Tag Docker image
-      #   run: docker tag gakuji-api:latest 533267207624.dkr.ecr.us-east-2.amazonaws.com/gakuji-api:latest
-      # - name: Push Docker image
-      #   run: docker push 533267207624.dkr.ecr.us-east-2.amazonaws.com/gakuji-api:latest
+     
+      - name: List and delete all images in process-lines repository
+        run: |
+          image_tags=$(aws ecr list-images --repository-name process-lines --query 'imageIds[*]' --output json --region us-east-2)
+          if [ "$image_tags" != "[]" ]; then
+            aws ecr batch-delete-image --repository-name process-lines --image-ids "$image_tags" --region us-east-2
+          fi 
+      - name: List and delete all images in gakuji-api repository
+        run: |
+          image_tags=$(aws ecr list-images --repository-name gakuji-api --query 'imageIds[*]' --output json --region us-east-2)
+          if [ "$image_tags" != "[]" ]; then
+            aws ecr batch-delete-image --repository-name gakuji-api --image-ids "$image_tags" --region us-east-2
+          fi 
+          
+      - name: Build Docker image
+        run: docker build -t gakuji-api .
+      - name: Tag Docker image
+        run: docker tag gakuji-api:latest 533267207624.dkr.ecr.us-east-2.amazonaws.com/gakuji-api:latest
+      - name: Push Docker image
+        run: docker push 533267207624.dkr.ecr.us-east-2.amazonaws.com/gakuji-api:latest
 
       - name: Build Docker Image for process-lines
         run: docker build -t process-lines ./longRunningFunction
@@ -35,12 +49,12 @@ jobs:
         run: docker push 533267207624.dkr.ecr.us-east-2.amazonaws.com/process-lines:latest
 
 
-      # - name: Update Lambda function code
-      #   run: |
-      #       aws lambda update-function-code \
-      #       --function-name gakuji-api \
-      #       --image-uri 533267207624.dkr.ecr.us-east-2.amazonaws.com/gakuji-api:latest \
-      #       --region "us-east-2"
+      - name: Update Lambda function code
+        run: |
+            aws lambda update-function-code \
+            --function-name gakuji-api \
+            --image-uri 533267207624.dkr.ecr.us-east-2.amazonaws.com/gakuji-api:latest \
+            --region "us-east-2"
 
       - name: Update process-lines Lambda function code
         run: |
@@ -49,7 +63,7 @@ jobs:
           --image-uri 533267207624.dkr.ecr.us-east-2.amazonaws.com/process-lines:latest  \
           --region "us-east-2"
 
-      # - name: Wait for lambda to complete update
-      #   run: bash ./scripts/wait_for_lambda.sh gakuji-api
-      # - name: Health Check API
-      #   run: bash ./scripts/health_check.sh
+      - name: Wait for lambda to complete update
+        run: bash ./scripts/wait_for_lambda.sh gakuji-api
+      - name: Health Check API
+        run: bash ./scripts/health_check.sh
