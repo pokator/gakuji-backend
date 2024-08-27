@@ -185,7 +185,7 @@ def create_word_return(idseq):
 
 #need a route which takes in a spotify uri and adds the processed song to the database.
 @router.post("/add-song-spot")
-async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get_current_user), session : Session = Depends(get_current_session)):
+async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get_current_user), session = Depends(get_current_session)):
     uri = spotifyItem.uri
     print(uri)
     print(user)
