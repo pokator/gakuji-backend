@@ -185,7 +185,7 @@ def create_word_return(idseq):
 
 #need a route which takes in a spotify uri and adds the processed song to the database.
 @router.post("/add-song-spot")
-async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get_current_user), session = Depends(get_current_session)):
+async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get_current_user), session : Session = Depends(get_current_session)):
     uri = spotifyItem.uri
     print(uri)
     print(user)
@@ -208,11 +208,12 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
                 tokenized_lines, hiragana_lines = tokenize(lines)
                 kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
                 all_kanji_data = get_all_kanji_data(kanji_list)
+
                 
                 response = supabase.table("SongData").insert({"title": song, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image}).execute()
                 # word_mapping = process_tokenized_lines(tokenized_lines)
                 
-                body = {"song": song, "artist": artist, "word_mapping": tokenized_lines, "token": session.access_token}
+                body = {"song": song, "artist": artist, "word_mapping": tokenized_lines, "access_token": session.access_token, "refresh_token": session.refresh_token}
                 print(body)
                 
                 sqs = aws_session.resource('sqs')

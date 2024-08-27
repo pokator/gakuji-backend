@@ -88,11 +88,12 @@ def lambda_handler(event, context):
             tokenized_lines = body['word_mapping']
             artist = body['artist']
             song = body['song']
-            token = body['token']
+            access_token = body['access_token']
+            refresh_token = body['refresh_token']
             # Perform the long-running task
             word_mapping = process_tokenized_lines(tokenized_lines)
             print(f"Updating Supabase with token: {token}")
-            supabase.auth.set_session(token)
+            supabase.auth.set_session(access_token, refresh_token)
             response = supabase.table("SongData").update({"word_mapping": word_mapping}).eq("title", song).eq("artist", artist).execute()
             print(f"Supabase update response: {response}")
             
