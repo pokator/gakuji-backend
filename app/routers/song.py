@@ -29,8 +29,8 @@ oauth2_scheme = (
 )
 
 
-cid = os.getenv("SPOTIPY_CLIENT_ID")
-secret = os.getenv("SPOTIPY_CLIENT_SECRET")
+cid = os.getenv("SPOTIFY_CLIENT_ID")
+secret = os.getenv("SPOTIFY_CLIENT_SECRET")
 genius_token = os.getenv("GENIUS_ACCESS_TOKEN")
 
 client_credentials_manager = SpotifyClientCredentials(client_id=cid, client_secret=secret)
