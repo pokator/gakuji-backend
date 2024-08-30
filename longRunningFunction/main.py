@@ -92,7 +92,7 @@ def lambda_handler(event, context):
             refresh_token = body['refresh_token']
             # Perform the long-running task
             word_mapping = process_tokenized_lines(tokenized_lines)
-            print(f"Updating Supabase with token: {token}")
+            print(f"Updating Supabase with token: {access_token}")
             supabase.auth.set_session(access_token, refresh_token)
             response = supabase.table("SongData").update({"word_mapping": word_mapping}).eq("title", song).eq("artist", artist).execute()
             print(f"Supabase update response: {response}")
@@ -109,22 +109,29 @@ def lambda_handler(event, context):
         }
 
 
-# mapping = {
-#     "Records": [
-#         {
-#             "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
-#             "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a...",
-#             "body": "{\"song\":\"Burning\",\"artist\":\"Hitsujibungaku\",\"word_mapping\":[[\"[\",\"Verse\",\"1\",\"[\"],[\"都合\",\"良い\",\"理想\",\"ばつ\",\"か\"],[\"並べ\",\"たって\",\"現実\",\"は\",\"暗い\"],[\"傷つく\",\"の\",\"が\",\"癖\",\"に\",\"なっ\",\"てる\"],[\"誰\",\"を\",\"許せ\",\"ない\",\"の\",\"？\"],[],[\"[\",\"Pre\",\"-\",\"Chorus\",\"[\"],[\"愛し\",\"たい\",\"もの\",\"から\",\"壊し\",\"て\"],[\"失う\",\"前\",\"に\",\"手放し\",\"て\",\"しまえ\",\"ば\"],[\"いい\",\"と\",\"思っ\",\"て\",\"い\",\"た\"],[],[\"[\",\"Chorus\",\"[\"],[\"But\",\"I\",\"'\",\"m\",\"crying\"],[\"今\",\"重たい\",\"幕\",\"が\",\"開け\",\"ば\"],[\"「\",\"ここ\",\"に\",\"気づい\",\"て\",\"」\",\"と\",\"(\",\"いて\",\"と\",\")\"],[\"声\",\"を\",\"枯らし\",\"ながら\"],[\"叫び\",\"続け\",\"て\",\"い\",\"た\"],[],[\"[\",\"Verse\",\"2\",\"[\"],[\"足り\",\"ない\",\"自分\",\"数え\",\"て\"],[\"比べ\",\"たって\",\"変われ\",\"ない\",\"や\"],[\"また\",\"ここ\",\"で\",\"立ち止まっ\",\"た\"],[\"どこ\",\"へ\",\"行け\",\"ば\",\"いい\",\"の\",\"？\"],[\"[\",\"Pre\",\"-\",\"Chorus\",\"[\"],[\"適当\",\"な\",\"理由\",\"探し\",\"て\"],[\"目\",\"を\",\"逸らし\",\"た\",\"って\",\"チラつい\",\"た\",\"あの\",\"日\",\"の\",\"夢\"],[\"奇跡\",\"なんて\",\"信じ\",\"ない\",\"って\",\"決め\",\"た\",\"の\",\"に\"],[\"どっ\",\"か\",\"望ん\",\"で\",\"しまう\",\"の\",\"を\"],[\"何\",\"度\",\"も\",\"掻き消し\",\"た\"],[],[\"[\",\"Chorus\",\"[\"],[\"But\",\"well\",\"I\",\"'\",\"m\",\"crying\"],[\"今\",\"眩しい\",\"光\",\"の\",\"中\",\"で\"],[\"どんな\",\"痛み\",\"さえ\"],[\"輝き\",\"に\",\"変え\",\"ながら\"],[\"命\",\"を\",\"燃やす\",\"の\"],[\"Lying\"],[\"完璧\",\"な\",\"舞台\",\"の\",\"裏\",\"で\"],[\"震える\",\"言葉\",\"を\"],[\"噛み殺し\",\"て\",\"も\"],[],[\"[\",\"Bridge\",\"[\"],[\"何に\",\"も\",\"なれ\",\"ない\",\"って\"],[\"誰\",\"より\",\"わかっ\",\"て\",\"いる\",\"みたい\",\"に\"],[\"吐き捨て\",\"た\"],[\"あと\",\"幾\",\"つ\",\"手\",\"に\",\"し\",\"たら\"],[\"満たさ\",\"れる\",\"ん\",\"だ\",\"？\"],[\"れん\",\"答え\",\"て\",\"涙\",\"が\",\"あ\",\"あ\",\"涙\",\"が\"],[\"[\",\"Chorus\",\"[\"],[\"Yeah\",\" ,\",\"I\",\"'\",\"m\",\"crying\"],[\"消え\",\"ない\",\"傷跡\",\"が\",\"明日\",\"を\"],[\"飲み込む\",\"前\",\"に\"],[\"暗闇\",\"の\",\"底\",\"から\"],[\"命\",\"を\",\"燃やす\",\"の\"],[\"Lying\"],[\"今\",\"眩しい\",\"光\",\"の\",\"中\",\"で\"],[\"どんな\",\"痛み\",\"さえ\"],[\"輝き\",\"に\",\"変え\",\"ながら\"],[\"命\",\"を\",\"燃やす\",\"の\"],[],[\"[\",\"Outro\",\"[\"],[\"この\",\"気持ち\",\"は\"],[\"誰\",\"に\",\"も\",\"言え\",\"ない\",\"Embed\"]],\"token\":\"eyJhbGciOiJIUzI1NiIsImtpZCI6IjdxaTlpTzk0djh5Q1dNVkQiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2xlb3J5b3dibGVmaXVlbnp6aXl0LnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIxMThmYmY3OS1kOWVmLTQ0NGItYTc4MS0wMWRlN2Y5NzE4YzIiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzI0NTI3OTA2LCJpYXQiOjE3MjQ1MjQzMDYsImVtYWlsIjoic291cmF2QHV0ZXhhcy5lZHUiLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsIjoic291cmF2QHV0ZXhhcy5lZHUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsInBob25lX3ZlcmlmaWVkIjpmYWxzZSwic3ViIjoiMTE4ZmJmNzktZDllZi00NDRiLWE3ODEtMDFkZTdmOTcxOGMyIn0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3MjQ1MjQzMDZ9XSwic2Vzc2lvbl9pZCI6ImQ5ZDE5ZGM3LWE5NjgtNDY5ZS1iYjZhLWQ5YzcxYTk2Y2U2OSIsImlzX2Fub255bW91cyI6ZmFsc2V9.RIKaU-66n8s3Er0miJDjCXK61NCMZS-WZzLbyLDgbhE\"}",
-#             "attributes": {
-#                 "ApproximateReceiveCount": "1",
-#                 "SentTimestamp": "1545082649183",
-#                 "SenderId": "AIDAIENQZJOLO23YVJ4VO",
-#                 "ApproximateFirstReceiveTimestamp": "1545082649185"
-#             }
-#         }
-#     ]
-# }
+data = {'song': 'Burning', 'artist': 'Hitsujibungaku', 'word_mapping': [['[', 'Verse', '1', ']'], ['都合', '良い', '理想', 'ばつ', 'か'], ['並べ', 'たって', '現実', 'は', '暗い'], ['傷つく', 'の', 'が', '癖', 'に', 'なっ', 'てる'], ['誰', 'を', '許せ', 'ない', 'の', '？'], [], ['[', 'Pre', '-', 'Chorus', ']'], ['愛し', 'たい', 'もの', 'から', '壊し', 'て'], ['失う', '前', 'に', '手放し', 'て', 'しまえ', 'ば'], ['いい', 'と', '思っ', 'て', 'い', 'た'], [], ['[', 'Chorus', ']'], ['But', 'I', "'", 'm', 'crying'], ['今', '重たい', '幕', 'が', '開け', 'ば'], ['「', 'ここ', 'に', '気づい', 'て', '」', 'と', '(', 'いて', 'と', ')'], ['声', 'を', '枯らし', 'ながら'], ['叫び', '続け', 'て', 'い', 'た'], [], ['[', 'Verse', '2', ']'], ['足り', 'ない', '自分', '数え', 'て'], ['比べ', 'たって', '変われ', 'ない', 'や'], ['また', 'ここ', 'で', '立ち止まっ', 'た'], ['どこ', 'へ', '行け', 'ば', 'いい', 'の', '？'], ['[', 'Pre', '-', 'Chorus', ']'], ['適当', 'な', '理由', '探し', 'て'], ['目', 'を', '逸らし', 'た', 'って', 'チラつい', 'た', 'あの', '日', 'の', '夢'], ['奇跡', 'なんて', '信じ', 'ない', 'って', '決め', 'た', 'の', 'に'], ['どっ', 'か', '望ん', 'で', 'しまう', 'の', 'を'], ['何', '度', 'も', '掻き消し', 'た'], [], ['[', 'Chorus', ']'], ['But', 'well', 'I', "'", 'm', 'crying'], ['今', '眩しい', '光', 'の', '中', 'で'], ['どんな', '痛み', 'さえ'], ['輝き', 'に', '変え', 'ながら'], ['命', 'を', '燃やす', 'の'], ['Lying'], ['完璧', 'な', '舞台', 'の', '裏', 'で'], ['震える', '言葉', 'を'], ['噛み殺し', 'て', 'も'], [], ['[', 'Bridge', ']'], ['何に', 'も', 'なれ', 'ない', 'って'], ['誰', 'より', 'わかっ', 'て', 'いる', 'みたい', 'に'], ['吐き捨て', 'た'], ['あと', '幾', 'つ', '手', 'に', 'し', 'たら'], ['満たさ', 'れる', 'ん', 'だ', '？'], ['れん', '答え', 'て', '涙', 'が', 'あ', 'あ', '涙', 'が'], ['[', 'Chorus', ']'], ['Yeah', ',', 'I', "'", 'm', 'crying'], ['消え', 'ない', '傷跡', 'が', '明日', 'を'], ['飲み込む', '前', 'に'], ['暗闇', 'の', '底', 'から'], ['命', 'を', '燃やす', 'の'], ['Lying'], ['今', '眩しい', '光', 'の', '中', 'で'], ['どんな', '痛み', 'さえ'], ['輝き', 'に', '変え', 'ながら'], ['命', 'を', '燃やす', 'の'], [], ['[', 'Outro', ']'], ['この', '気持ち', 'は'], ['誰', 'に', 'も', '言え', 'ない', 'Embed']], 'access_token': 'eyJhbGciOiJIUzI1NiIsImtpZCI6IjdxaTlpTzk0djh5Q1dNVkQiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2xlb3J5b3dibGVmaXVlbnp6aXl0LnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIxMThmYmY3OS1kOWVmLTQ0NGItYTc4MS0wMWRlN2Y5NzE4YzIiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzI1MDM3MTI4LCJpYXQiOjE3MjUwMzM1MjgsImVtYWlsIjoic291cmF2QHV0ZXhhcy5lZHUiLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsIjoic291cmF2QHV0ZXhhcy5lZHUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsInBob25lX3ZlcmlmaWVkIjpmYWxzZSwic3ViIjoiMTE4ZmJmNzktZDllZi00NDRiLWE3ODEtMDFkZTdmOTcxOGMyIn0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3MjUwMzM1Mjh9XSwic2Vzc2lvbl9pZCI6ImM2MTI4MDg2LTk4YzEtNDEyNC05NzU3LTg3MTFlN2I1MGU5ZiIsImlzX2Fub255bW91cyI6ZmFsc2V9.Ju-8i3Id0wwXf6MulUiZXDspG75eKXs-3Gg1QvKakiM', 'refresh_token': 'TfIg2xJkDYmua35lwJ7ong'}
+
+# Convert the JSON to a string
+body_str = json.dumps(data)
+
+mapping = {
+    "Records": [
+        {
+            "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
+            "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a...",
+            "body": body_str,
+            "attributes": {
+                "ApproximateReceiveCount": "1",
+                "SentTimestamp": "1545082649183",
+                "SenderId": "AIDAIENQZJOLO23YVJ4VO",
+                "ApproximateFirstReceiveTimestamp": "1545082649185"
+            }
+        }
+    ]
+}
+
+print(mapping)
 
 
 
-# process_lines(mapping, None)
+# lambda_handler(mapping, None)

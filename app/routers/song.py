@@ -220,7 +220,7 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
                 queue = sqs.Queue(sqs_url)
                 queue.send_message(
                     # QueueUrl=sqs_url,
-                    MessageBody=str(body)
+                    MessageBody=json.dumps(body)
                 )
             response = supabase.table("Song").insert({"title": song, "artist": artist, "id": user.id}).execute()
             return response
@@ -259,14 +259,14 @@ async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_us
                 #     MessageBody=body
                 # )
                 
-                body = {"song": title, "artist": artist, "word_mapping": tokenized_lines, "token": session.access_token}
+                body = {"song": title, "artist": artist, "word_mapping": tokenized_lines, "access_token": session.access_token, "refresh_token": session.refresh_token}
                 print(body)
                 
                 sqs = aws_session.resource('sqs')
                 queue = sqs.Queue(sqs_url)
                 queue.send_message(
                     # QueueUrl=sqs_url,
-                    MessageBody=str(body)
+                    MessageBody=json.dumps(body)
                 )
                 # response = supabase.table("Song").insert({"title": title, "artist": artist, "lyrics": cleaned_lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "uuid": supabase.auth.get_user().user.id, "image_url": image_url}).execute()
                 # response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
