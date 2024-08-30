@@ -57,9 +57,7 @@ async def get_type_lists(type: str, user: User = Depends(get_current_user)):
 
 def list_has_word(list_id: str, word: str):
     in_my_table = supabase.table("ListItem").select("*", count="exact").eq("list_id", list_id).eq("value", word).execute()
-    print(in_my_table)
     count = in_my_table.count
-    print(count > 0)
     if count > 0:
         return True
     else:

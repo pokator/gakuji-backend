@@ -49,8 +49,6 @@ aws_session = boto3.Session(
     region_name="us-east-2"
 )
 
-# print(os.listdir())
-
 def load_kanji_data(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         return json.load(file)
@@ -137,24 +135,6 @@ def get_all_kanji_data(kanji_list):
         all_kanji_data[kanji] = data
     return all_kanji_data
 
-# #gets an ID for a particular word in the lyrics.
-# def get_word_info(word):
-#     result = jam.lookup(word)
-#     word_info = []
-#     for entry in result.entries[:3]:  # Include up to 3 entries
-#         word_info.append(entry.idseq)
-#     return word_info
-
-# #getting the word info for all words in the lyrics
-# def process_tokenized_lines(lines):
-#     word_dict = {}
-#     for line in lines:
-#         for word in line:
-#             word_info = get_word_info(word)
-#             if len(word_info) > 0:
-#                 word_dict[word] = word_info
-#     return word_dict
-
 def create_word_return(idseq):
     word_result = jam.lookup("id#"+idseq).to_dict()['entries'][0]
     word = word_result['kanji'][0]['text']
@@ -187,9 +167,6 @@ def create_word_return(idseq):
 @router.post("/add-song-spot")
 async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get_current_user), session = Depends(get_current_session)):
     uri = spotifyItem.uri
-    print(uri)
-    print(user)
-    print(session)
     if uri is None or user is None:
         return {"message": "Missing information. Please try again."}
     else:
@@ -214,7 +191,6 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
                 # word_mapping = process_tokenized_lines(tokenized_lines)
                 
                 body = {"song": song, "artist": artist, "word_mapping": tokenized_lines, "access_token": session.access_token, "refresh_token": session.refresh_token}
-                print(body)
                 
                 sqs = aws_session.resource('sqs')
                 queue = sqs.Queue(sqs_url)
@@ -260,7 +236,6 @@ async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_us
                 # )
                 
                 body = {"song": title, "artist": artist, "word_mapping": tokenized_lines, "access_token": session.access_token, "refresh_token": session.refresh_token}
-                print(body)
                 
                 sqs = aws_session.resource('sqs')
                 queue = sqs.Queue(sqs_url)
@@ -317,12 +292,3 @@ async def get_global_songs(limit: int = 10, offset: int = 0, user: User = Depend
     else:
         response = supabase.table("Song").select("title, artist, SongData(image_url)").limit(limit).offset(offset).order("created_at", desc=True).execute()
         return response.data
-
-
-
-
-# cleaned_result = clean_lyrics(result)
-# print(cleaned_result)
-
-# lines = split_into_lines(cleaned_result)
-# print(lines)

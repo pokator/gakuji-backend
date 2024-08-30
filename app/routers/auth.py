@@ -30,7 +30,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
 
         data = supabase.auth.get_user(token)
         user_id = data.user.id
-        print(supabase.auth.get_session())
 
         # First, try to find the user in the Caregiver table
         user = (
@@ -50,8 +49,6 @@ async def get_current_session(token: str = Depends(oauth2_scheme)):
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    data = supabase.auth.get_user(token)
-    print(supabase.auth.get_session())
     return supabase.auth.get_session()
 
 @router.get("/current-user")
@@ -98,7 +95,6 @@ async def set_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    print(data.session.access_token)
     supabase.auth.set_session(data.session.access_token, data.session.refresh_token)
     return {"access_token": data.session.access_token, "token_type": "bearer"}
 
