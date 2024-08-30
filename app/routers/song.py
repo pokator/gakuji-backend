@@ -29,13 +29,13 @@ oauth2_scheme = (
 )
 
 
-cid ='5edc552c91d8428cbcaf7eb1230a9526'
-secret ='9d3113c375c3436abb7caf696dd6e538'
-genius_secret = "anr-ZTXEBFL5IiCqeJGAXF5Zz--f2zW0kR_CfIbt5hiJ-Y8_f7MdCyq2YQqSwr4H"
+cid = os.getenv("SPOTIPY_CLIENT_ID")
+secret = os.getenv("SPOTIPY_CLIENT_SECRET")
+genius_token = os.getenv("GENIUS_ACCESS_TOKEN")
 
 client_credentials_manager = SpotifyClientCredentials(client_id=cid, client_secret=secret)
 sp = spotipy.Spotify(client_credentials_manager = client_credentials_manager)
-genius = Genius(genius_secret)
+genius = Genius(genius_token)
 jam = Jamdict(memory_mode=True)
 tagger = fugashi.Tagger()
 kakasi = pykakasi.kakasi()
