@@ -255,7 +255,7 @@ async def get_song(title: str = None, artist: str = None, user: User = Depends(g
         return {"message": "Missing information. Please try again."}
     else:
         # have access to title, artist, uuid
-        response = supabase.table("SongData").select("lyrics, hiragana_lyrics, word_mapping").eq("title", title).eq("artist", artist).execute()
+        response = supabase.table("SongData").select("lyrics, hiragana_lyrics, word_mapping, kanji_data").eq("title", title).eq("artist", artist).execute()
         if response.count == 0:
             return {"message": "Song not found in database."}
         else:
