@@ -107,3 +107,5 @@ async def get_word_data(value: str, user: User = Depends(get_current_user)):
         return get_kanji_data(value)
     else:
         return create_word_return(value)
+
+#TODO: instead of setting title and artist in add_word, set song_uid.

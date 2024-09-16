@@ -292,3 +292,15 @@ async def get_global_songs(limit: int = 10, offset: int = 0, user: User = Depend
     else:
         response = supabase.table("Song").select("title, artist, SongData(image_url)").limit(limit).offset(offset).order("created_at", desc=True).execute()
         return response.data
+    
+#TODO: add a get image url function that takes title and artist and distinctly returns an image url.
+@router.get("/get-image")
+async def get_image(title: str = None, artist: str = None, user: User = Depends(get_current_user)):
+    if title is None or artist is None or user is None:
+        return {"message": "Missing information. Please try again."}
+    else:
+        response = supabase.table("SongData").select("image_url").eq("title", title).eq("artist", artist).limit(1).execute()
+        if response.count == 0:
+            return {"message": "Song not found in database."}
+        else:
+            return response.data[0]
