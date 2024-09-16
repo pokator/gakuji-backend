@@ -25,6 +25,7 @@ def get_word_info(word):
     result = jam.lookup(word)
     word_info = []
     for entry in result.entries[:3]:  # Include up to 3 entries
+        idseq = entry.idseq
         if entry.kanji_forms:
             word = entry.kanji_forms[0].text
         else:
@@ -45,6 +46,7 @@ def get_word_info(word):
             word_properties.append(word_property)
         
         entry_result = {
+            "idseq": idseq,
             "word": word,
             "furigana": furigana,
             "romaji": romaji,
