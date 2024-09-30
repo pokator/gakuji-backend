@@ -21,7 +21,7 @@ AUXILIARIES = {
     'でございます': 'formal copula', 'かもしれない': 'possibility', 'だ': 'assertion',
     'であった': 'assertion past', 'でいる': 'continuous', 'でいた': 'continuous past',
     'ございます': 'politeness', 'やがる': 'disdain', 'ちまう': 'completion (casual)',
-    'てしまう': 'completion', # Add more as needed based on specific usage scenarios
+    'てしまう': 'completion', 'て': 'indicates continuing action​', 'で': 'indicates continuing action​' # Add more as needed based on specific usage scenarios
 }
 
 load_dotenv()
@@ -125,10 +125,10 @@ def process_tokenized_lines(lines):
                 word_info = get_word_info(word.feature.lemma)
                 final_word = word.surface
                 pos += 1
-                while pos + 1 < len(line) and line[pos + 1].feature.pos1 == '助動詞':
+                while pos< len(line) and line[pos].surface in AUXILIARIES:
                     # we have found an auxiliary verb. Need to reflect in main verb's definitions, furigana, and romaji
-                    pos += 1
                     aux_word = line[pos]
+                    print(aux_word.surface, aux_word.feature, aux_word.pos, sep='\t')
                     final_word += aux_word.surface
                     aux_furigana = conv.do(word.surface)
                     for info in word_info:
@@ -139,7 +139,7 @@ def process_tokenized_lines(lines):
                     if aux_meaning:
                         for info in word_info:
                             info['definitions'] = modify_definitions(info['definitions'], [aux_meaning])
-                
+                    pos += 1
                 word_dict[final_word] = word_info
                 new_line.append(final_word)
                 # If there's an unfinished verb+auxiliary sequence, store it
@@ -351,10 +351,14 @@ def lambda_handler(event, context):
 # そうだ僕は星だった
 # Stellar-stellar"""
 
-# # cleaned_lyrics = """ 見えなかった"""
-# lines = split_into_lines(cleaned_lyrics)
-# tokenized_lines = tokenize(lines)
-# word_mapping = process_tokenized_lines(tokenized_lines)
+cleaned_lyrics = """ 探してもがいて"""
+lines = split_into_lines(cleaned_lyrics)
+tokenized_lines = tokenize(lines)
+word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
+
+print(word_mapping)
+print(lyrics)
+
 
 # # pipe to a file
 # with open("word_mapping.json", "w") as f:
