@@ -100,7 +100,7 @@ def tokenize(lines):
     to_hiragana_list = []
     for line in lines:
         # tagged = tagger(line)
-        tagged_line = [word.surface for word in tagger(line)]
+        tagged_line = [word for word in tagger(line)]
         to_hiragana_list.append(conv.do(line))
         line_list.append(tagged_line)
     return line_list, to_hiragana_list
