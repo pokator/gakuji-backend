@@ -101,8 +101,10 @@ def is_japanese(text):
 
 def process_tokenized_lines(lines):
     word_dict = {}
+    lyrics = []
 
     for line in lines:
+        new_line = []
         # combined_word = ""
         # combined_furigana = ""
         # combined_romaji = ""
@@ -121,11 +123,13 @@ def process_tokenized_lines(lines):
 
             if word.feature.pos1 == '動詞':  # Main verb detection
                 word_info = get_word_info(word.feature.lemma)
+                final_word = word.surface
                 pos += 1
                 while pos + 1 < len(line) and line[pos + 1].feature.pos1 == '助動詞':
                     # we have found an auxiliary verb. Need to reflect in main verb's definitions, furigana, and romaji
                     pos += 1
                     aux_word = line[pos]
+                    final_word += aux_word.surface
                     aux_furigana = conv.do(word.surface)
                     for info in word_info:
                         info['furigana'] += aux_furigana
@@ -136,7 +140,8 @@ def process_tokenized_lines(lines):
                         for info in word_info:
                             info['definitions'] = modify_definitions(info['definitions'], [aux_meaning])
                 
-                word_dict[word.surface] = word_info
+                word_dict[final_word] = word_info
+                new_line.append(final_word)
                 # If there's an unfinished verb+auxiliary sequence, store it
                 # if combined_word:
                 #     word_dict[combined_word] = {
@@ -170,6 +175,7 @@ def process_tokenized_lines(lines):
                 word_info = get_word_info(word.surface)
                 if len(word_info) > 0:
                     word_dict[word.surface] = word_info
+                    new_line.append(word.surface)
                 pos += 1
                 # word_info = get_word_info(word.surface)
                 # # Store the current combined word before switching to the next word
@@ -197,7 +203,7 @@ def process_tokenized_lines(lines):
                 # combined_furigana = ""
                 # combined_romaji = ""
                 # aux_meanings = []
-
+        lyrics.append(new_line)
         # Store any remaining combined word+auxiliary sequence after processing the line
         # if combined_word:
         #     word_dict[combined_word] = {
@@ -208,7 +214,7 @@ def process_tokenized_lines(lines):
         #         "definitions": modify_definitions(combined_word_info[0]['definitions'], aux_meanings)
         #     }
 
-    return word_dict
+    return word_dict, lyrics
 
 
 def modify_definitions(definitions_list, aux_meanings):
@@ -217,6 +223,15 @@ def modify_definitions(definitions_list, aux_meanings):
             aux_str = ", ".join(aux_meanings)
             definitions_list[i]['definition'] = f"{definition['definition']} ({aux_str})"
     return definitions_list
+
+def convert_to_hiragana(lyrics):
+    hiragana_lyrics = []
+    for line in lyrics:
+        hiragana_line = []
+        for word in line:
+            hiragana_line.append(conv.do(word))
+        hiragana_lyrics.append(hiragana_line)
+    return hiragana_lyrics
 
 def lambda_handler(event, context):
     try:
@@ -240,7 +255,8 @@ def lambda_handler(event, context):
 
             lines = split_into_lines(cleaned_lyrics)
             tokenized_lines = tokenize(lines)
-            word_mapping = process_tokenized_lines(tokenized_lines)
+            word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
+            hiragana_lines = convert_to_hiragana(lyrics)
 
             supabase.auth.set_session(access_token, refresh_token)
             # print(f"Updating database for song: {song} by {artist}")
