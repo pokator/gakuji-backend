@@ -29,7 +29,7 @@ api_url: str = os.getenv("SUPABASE_URL")
 key: str = os.getenv("SUPABASE_API")
 
 def create_supabase_client():
-    print("Creating Supabase client.")
+    # print("Creating Supabase client.")
     supabase: Client = create_client(api_url, key)
     return supabase
 
@@ -42,17 +42,17 @@ supabase = create_supabase_client()
 tagger = fugashi.Tagger()
 
 def split_into_lines(lyrics):
-    print("Splitting lyrics into lines.")
+    # print("Splitting lyrics into lines.")
     lines = lyrics.strip().split('\n')
     return lines
 
 def tokenize(lines):
-    print("Tokenizing lyrics.")
+    # print("Tokenizing lyrics.")
     line_list = []
     to_hiragana_list = []
     lyric_list = []
     for line in lines:
-        print(f"Tokenizing line: {line}")
+        # print(f"Tokenizing line: {line}")
         tagged_line = tagger(line)
         lyric_line = [word.surface for word in tagged_line]
         lyric_list.append(lyric_line)
@@ -61,7 +61,7 @@ def tokenize(lines):
     return lyric_list, line_list, to_hiragana_list
 
 def get_word_info(word):
-    print(f"Looking up word: {word}")
+    # print(f"Looking up word: {word}")
     result = jam.lookup(word)
     word_info = []
     for entry in result.entries[:3]:  # Limit to 3 entries
@@ -91,11 +91,11 @@ def get_word_info(word):
         }
         word_info.append(entry_result)
 
-    print(f"Word info retrieved: {word_info}")
+    # print(f"Word info retrieved: {word_info}")
     return word_info
 
 def process_tokenized_lines(lines):
-    print("Processing tokenized lines.")
+    # print("Processing tokenized lines.")
     word_dict = {}
     
     for line in lines:
@@ -107,36 +107,39 @@ def process_tokenized_lines(lines):
         aux_meanings = []
 
         for word in line:
-            print(f"Processing word: {word.surface}")
-            word_info = get_word_info(word.feature.lemma)
+            # print(f"Processing word: {word.surface}")
+            if word.feature.lemma == None:
+                continue
+            else:
+                word_info = get_word_info(word.feature.lemma)
 
-            if word.feature.pos1 == '動詞':  # Main verb detection
-                print(f"Detected verb: {word.surface}")
-                if combined_word:
-                    word_dict[combined_word] = {
-                        "word": combined_word,
-                        "furigana": combined_furigana,
-                        "romaji": combined_romaji,
-                        "definitions": modify_definitions(definitions_list, aux_meanings)
-                    }
-                
-                combined_word = word.surface
-                combined_lemma = word.feature.lemma
-                combined_furigana = word.feature.kana
-                combined_romaji = word.feature.pronBase
-                definitions_list = word_info[0]['definitions']
-                aux_meanings = []
+                if word.feature.pos1 == '動詞':  # Main verb detection
+                    # print(f"Detected verb: {word.surface}")
+                    if combined_word:
+                        word_dict[combined_word] = {
+                            "word": combined_word,
+                            "furigana": combined_furigana,
+                            "romaji": combined_romaji,
+                            "definitions": modify_definitions(definitions_list, aux_meanings)
+                        }
+                    
+                    combined_word = word.surface
+                    combined_lemma = word.feature.lemma
+                    combined_furigana = word.feature.kana
+                    combined_romaji = word.feature.pronBase
+                    definitions_list = word_info[0]['definitions']
+                    aux_meanings = []
 
-            elif word.feature.pos1 == '助動詞':  # Auxiliary verb detection
-                print(f"Detected auxiliary verb: {word.surface}")
-                combined_word += word.surface
-                combined_furigana += word.feature.kana
-                combined_romaji += word.feature.pronBase
+                elif word.feature.pos1 == '助動詞':  # Auxiliary verb detection
+                    # print(f"Detected auxiliary verb: {word.surface}")
+                    combined_word += word.surface
+                    combined_furigana += word.feature.kana
+                    combined_romaji += word.feature.pronBase
 
-                aux_lemma = word.feature.lemma
-                aux_meaning = AUXILIARIES.get(aux_lemma)
-                if aux_meaning:
-                    aux_meanings.append(aux_meaning)
+                    aux_lemma = word.feature.lemma
+                    aux_meaning = AUXILIARIES.get(aux_lemma)
+                    if aux_meaning:
+                        aux_meanings.append(aux_meaning)
 
         if combined_word:
             word_dict[combined_word] = {
@@ -146,7 +149,7 @@ def process_tokenized_lines(lines):
                 "definitions": modify_definitions(definitions_list, aux_meanings)
             }
 
-    print(f"Processed word dictionary: {word_dict}")
+    # print(f"Processed word dictionary: {word_dict}")
     return word_dict
 
 def modify_definitions(definitions_list, aux_meanings):
@@ -158,11 +161,11 @@ def modify_definitions(definitions_list, aux_meanings):
 
 def lambda_handler(event, context):
     try:
-        print("Lambda handler invoked.")
+        # print("Lambda handler invoked.")
         for record in event['Records']:
             try:
                 body = json.loads(record['body'])
-                print(f"Processing record: {body}")
+                # print(f"Processing record: {body}")
             except json.JSONDecodeError as e:
                 print(f"JSON decoding error: {e}")
                 return {
@@ -181,7 +184,7 @@ def lambda_handler(event, context):
             word_mapping = process_tokenized_lines(tokenized_lines)
 
             supabase.auth.set_session(access_token, refresh_token)
-            print(f"Updating database for song: {song} by {artist}")
+            # print(f"Updating database for song: {song} by {artist}")
             response = supabase.table("SongData").update({
                 "lyrics": lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping
             }).eq("title", song).eq("artist", artist).execute()
@@ -196,3 +199,82 @@ def lambda_handler(event, context):
             'statusCode': 400,
             'body': json.dumps(f'Long-running task failed with error: {e}')
         }
+
+
+
+
+# cleaned_lyrics = """[星街すいせい「Stellar Stellar」歌詞]
+
+# [Intro]
+# だって僕は星だから
+# Stellar-stellar
+
+# [Verse 1]
+# きっと君はもう気づいていた
+# 僕の心の奥で描いた
+# それが これから話す 陳腐なモノローグさ
+
+# [Verse 2]
+# ── ずっと言えない言葉があった
+# 壊せない壁があったんだ ずっとさ
+# ふっと香り立つ朝の匂いが
+# どうしようもなく憎らしくて
+# 部屋の隅で 膝を抱えて震えていた
+# 太陽なんていらないから
+# 明けないでいて ──
+
+# [Pre-Chorus]
+# その手を伸ばして 誰かに届くように
+# 僕だって君と同じ 特別なんかじゃないから
+
+# [Chorus]
+# そうさ 僕は夜を歌うよ Stellar-stellar
+# ありったけの輝きで
+# 今宵 音楽は ずっと ずっと 止まない
+# そうだ 僕がずっとなりたかったのは
+# 待ってるシンデレラじゃないさ
+# 迎えに行く王子様だ
+# だって僕は星だから
+
+# [Verse 3]
+# なんて, ありふれた話なんだ
+# 理想だけ書き連ねていた
+# ノートの隅に眠る ほんのワンシーンだ
+# ── きっとあの星も泣いてるんだ
+# 明日なんて来ないままでいて ──
+
+# [Pre-Chorus]
+# その手を伸ばして 誰かに届くように
+# 本当に大切なものは
+# 目に見えないみたいなんだ
+
+# [Chorus]
+# そうさ 僕は夜を歌うよ Stellar-stellar
+# ありのまま考えないで
+# 今宵 音楽はきっときっと止まない
+# そうだ 僕がずっとなりたかったのは
+# あえかなヒロインじゃないさ
+# 救いに行くヒーローだ
+
+# [Bridge]
+# 夢見がちなおとぎ話
+# おとぎ話
+
+# [Chorus]
+# そうさ 僕は夜を歌うよ Stellar-stellar
+# ありったけの輝きで
+# 今宵 音楽はずっとずっと止まない
+# そうさ 僕は愛を歌うよ Stellar-stellar
+# 世界 宇宙の真ん中で
+# 今宵 音楽はきっときっと止まない
+# そうだ 僕がずっとなりたかったのは
+# 待ってるシンデレラじゃないさ
+# 迎えに行く王子様だ
+# だって僕は星だから
+
+# [Outro]
+# そうだ僕は星だった
+# Stellar-stellar"""
+# lines = split_into_lines(cleaned_lyrics)
+# lyrics, tokenized_lines, hiragana_lines = tokenize(lines)
+# word_mapping = process_tokenized_lines(tokenized_lines)
