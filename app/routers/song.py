@@ -209,15 +209,9 @@ async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_us
                       
                 # call long running SQS to process tokenized lines and add it to the database
                 response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": None, "hiragana_lyrics": None, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
-            #   This is done in the other longrunning function 
                 # word_mapping = process_tokenized_lines(tokenized_lines)
                 # body = {"song": title, "artist": artist, "word_mapping": tokenized_lines, "uuid": supabase.auth.get_user().user.id}
 
-                # sqs = boto3.client('sqs', region_name='us-east-2')
-                # sqs.send_message(
-                #     QueueUrl=sqs_url,
-                #     MessageBody=body
-                # )
                 
                 body = {"song": title, "artist": artist, "cleaned_lyrics": cleaned_lyrics, "access_token": session.access_token, "refresh_token": session.refresh_token}
                 
