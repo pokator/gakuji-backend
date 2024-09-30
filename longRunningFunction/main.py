@@ -118,6 +118,12 @@ def process_tokenized_lines(lines):
                 print(f"Skipping non-Japanese token: {word.surface}")
                 pos += 1
                 continue
+            
+            if word.surface in word_dict:
+                #efficiency modification - most songs will repeat words, why look them up again
+                print(f"Word already processed: {word.surface}")
+                pos += 1
+                continue
 
             print(f"Processing word: {word.surface}, Lemma: {word.feature.lemma}, POS1: {word.feature.pos1}")
 
@@ -175,6 +181,18 @@ def process_tokenized_lines(lines):
                 word_info = get_word_info(word.surface)
                 if len(word_info) > 0:
                     word_dict[word.surface] = word_info
+                    new_line.append(word.surface)
+                else :
+                    temp_list = []
+                    temp_properties = {'pos': word.pos, 'definition': ['not found']}
+                    temp_list.append({
+                        "idseq": "none",
+                        "word": word.surface,
+                        "furigana": conv.do(word.surface),
+                        "romaji": kakasi.convert(word.surface)[0]["hepburn"],
+                        "definitions": temp_properties
+                    })
+                    word_dict
                     new_line.append(word.surface)
                 pos += 1
                 # word_info = get_word_info(word.surface)
@@ -351,7 +369,7 @@ def lambda_handler(event, context):
 # そうだ僕は星だった
 # Stellar-stellar"""
 
-cleaned_lyrics = """ 探してもがいて"""
+cleaned_lyrics = """ 僕がいちばんなんにもないんだろう"""
 lines = split_into_lines(cleaned_lyrics)
 tokenized_lines = tokenize(lines)
 word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
