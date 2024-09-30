@@ -79,9 +79,8 @@ def tokenize(lines):
     to_hiragana_list = []
     lyric_list = []
     for line in lines:
-        # tagged = tagger(line)
-        lyric_line = [word.surface for word in tagger(line)]
-        tagged_line = [word for word in tagger(line)]
+        tagged_line = tagger(line)
+        lyric_line = [word.surface for word in tagged_line]
         lyric_list.append(lyric_line)
         to_hiragana_list.append(conv.do(line))
         line_list.append(tagged_line)
