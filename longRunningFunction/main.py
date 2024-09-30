@@ -4,6 +4,7 @@ import pykakasi
 import os
 from supabase import Client, create_client
 from dotenv import load_dotenv
+import fugashi
 
 AUXILIARIES = {
     'れる': 'passive',          # 食べられる -> to be eaten
@@ -64,6 +65,27 @@ kakasi.setMode("J", "H")
 kakasi.setMode("K", "H")
 conv = kakasi.getConverter()
 supabase = create_supabase_client()
+tagger = fugashi.Tagger()
+
+#setting up for tokenization
+def split_into_lines(lyrics):
+    # Split the lyrics into lines
+    lines = lyrics.strip().split('\n')
+    return lines
+
+#returns two lists: one with the tokenized lyrics and one with the lyrics in hiragana
+def tokenize(lines):
+    line_list = []
+    to_hiragana_list = []
+    lyric_list = []
+    for line in lines:
+        # tagged = tagger(line)
+        lyric_line = [word.surface for word in tagger(line)]
+        tagged_line = [word for word in tagger(line)]
+        lyric_list.append(lyric_line)
+        to_hiragana_list.append(conv.do(line))
+        line_list.append(tagged_line)
+    return lyric_list, line_list, to_hiragana_list
 
 def get_word_info(word):
     result = jam.lookup(word)
@@ -188,15 +210,17 @@ def lambda_handler(event, context):
                     'body': json.dumps('JSON decoding error: ' + str(e))
                 }
             
-            tokenized_lines = body['word_mapping']
+            cleaned_lyrics = body['cleaned_lyrics']
             artist = body['artist']
             song = body['song']
             access_token = body['access_token']
             refresh_token = body['refresh_token']
             # Perform the long-running task
+            lines = split_into_lines(cleaned_lyrics)
+            lyrics, tokenized_lines, hiragana_lines = tokenize(lines)
             word_mapping = process_tokenized_lines(tokenized_lines)
             supabase.auth.set_session(access_token, refresh_token)
-            response = supabase.table("SongData").update({"word_mapping": word_mapping}).eq("title", song).eq("artist", artist).execute()
+            response = supabase.table("SongData").update({"lyrics": lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping}).eq("title", song).eq("artist", artist).execute()
             
         return {
             'statusCode': 200,

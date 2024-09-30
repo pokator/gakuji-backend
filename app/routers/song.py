@@ -88,22 +88,6 @@ def clean_lyrics(lyrics):
     lyrics = re.sub(r'\d+Embed', '', lyrics)
     return lyrics
 
-#setting up for tokenization
-def split_into_lines(lyrics):
-    # Split the lyrics into lines
-    lines = lyrics.strip().split('\n')
-    return lines
-
-#returns two lists: one with the tokenized lyrics and one with the lyrics in hiragana
-def tokenize(lines):
-    line_list = []
-    to_hiragana_list = []
-    for line in lines:
-        # tagged = tagger(line)
-        tagged_line = [word for word in tagger(line)]
-        to_hiragana_list.append(conv.do(line))
-        line_list.append(tagged_line)
-    return line_list, to_hiragana_list
 
 #specifically used to return the list of kanji in the lyrics
 def extract_unicode_block(unicode_block, string):
@@ -126,7 +110,7 @@ def get_kanji_data(kanji):
         return sending_data
     else:
         return None
-
+    
 # gets the data for all kanji in the lyrics
 def get_all_kanji_data(kanji_list):
     all_kanji_data = {}
@@ -134,6 +118,7 @@ def get_all_kanji_data(kanji_list):
         data = get_kanji_data(kanji)
         all_kanji_data[kanji] = data
     return all_kanji_data
+
 
 def create_word_return(idseq):
     word_result = jam.lookup("id#"+idseq).to_dict()['entries'][0]
@@ -181,16 +166,16 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
                 song_data = genius.search_song(song, artist)
                 lyrics = song_data.lyrics
                 cleaned_lyrics = clean_lyrics(lyrics)
-                lines = split_into_lines(cleaned_lyrics)
-                tokenized_lines, hiragana_lines = tokenize(lines)
+                # lines = split_into_lines(cleaned_lyrics)
+                # tokenized_lines, hiragana_lines = tokenize(lines)
                 kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
                 all_kanji_data = get_all_kanji_data(kanji_list)
 
                 
-                response = supabase.table("SongData").insert({"title": song, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image}).execute()
+                response = supabase.table("SongData").insert({"title": song, "artist": artist, "lyrics": None, "hiragana_lyrics": None, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image}).execute()
                 # word_mapping = process_tokenized_lines(tokenized_lines)
                 
-                body = {"song": song, "artist": artist, "word_mapping": tokenized_lines, "access_token": session.access_token, "refresh_token": session.refresh_token}
+                body = {"song": song, "artist": artist, "cleaned_lyrics": cleaned_lyrics, "access_token": session.access_token, "refresh_token": session.refresh_token}
                 
                 sqs = aws_session.resource('sqs')
                 queue = sqs.Queue(sqs_url)
@@ -219,12 +204,11 @@ async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_us
                 # song not in global database
                 image_url = get_image(artist, title)
                 cleaned_lyrics = clean_lyrics(lyrics)
-                lines = split_into_lines(cleaned_lyrics)
-                tokenized_lines, hiragana_lines = tokenize(lines)
                 kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
-                all_kanji_data = get_all_kanji_data(kanji_list)        
+                all_kanji_data = get_all_kanji_data(kanji_list)
+                      
                 # call long running SQS to process tokenized lines and add it to the database
-                response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
+                response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": None, "hiragana_lyrics": None, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
             #   This is done in the other longrunning function 
                 # word_mapping = process_tokenized_lines(tokenized_lines)
                 # body = {"song": title, "artist": artist, "word_mapping": tokenized_lines, "uuid": supabase.auth.get_user().user.id}
@@ -235,7 +219,7 @@ async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_us
                 #     MessageBody=body
                 # )
                 
-                body = {"song": title, "artist": artist, "word_mapping": tokenized_lines, "access_token": session.access_token, "refresh_token": session.refresh_token}
+                body = {"song": title, "artist": artist, "cleaned_lyrics": cleaned_lyrics, "access_token": session.access_token, "refresh_token": session.refresh_token}
                 
                 sqs = aws_session.resource('sqs')
                 queue = sqs.Queue(sqs_url)
