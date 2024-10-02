@@ -123,6 +123,16 @@ def process_tokenized_lines(lines):
             # Get word information using lemma for definition lookup
             if not is_japanese(word.surface):
                 print(f"Skipping non-Japanese token: {word.surface}")
+                temp_list = []
+                temp_properties = {'pos': ["Not Applicable"], 'definition': ['not found']}
+                temp_list.append({
+                    "idseq": "none",
+                    "word": word.surface,
+                    "furigana": "N/A",
+                    "romaji": "N/A",
+                    "definitions": temp_properties
+                })
+                word_dict[word.surface] = temp_list
                 new_line.append(word.surface)
                 pos += 1
                 continue
@@ -188,13 +198,13 @@ def process_tokenized_lines(lines):
 
             else:  # For other parts of speech (nouns, adjectives, etc.)
                 print(word.surface, word.feature, word.pos, sep='\t')
-                word_info = get_word_info(word.feature.lemma)
+                word_info = get_word_info(word.surface)
                 if len(word_info) > 0:
                     word_dict[word.surface] = word_info
                     new_line.append(word.surface)
                 else :
                     print("surface lookup")
-                    word_info = get_word_info(word.surface)
+                    word_info = get_word_info(word.feature.lemma)
                     if len(word_info) > 0:
                         word_dict[word.surface] = word_info
                         new_line.append(word.surface)
@@ -313,78 +323,78 @@ def lambda_handler(event, context):
 
 
 
-# cleaned_lyrics = """[星街すいせい「Stellar Stellar」歌詞]
+cleaned_lyrics = """[星街すいせい「Stellar Stellar」歌詞]
 
-# [Intro]
-# だって僕は星だから
-# Stellar-stellar
+[Intro]
+だって僕は星だから
+Stellar-stellar
 
-# [Verse 1]
-# きっと君はもう気づいていた
-# 僕の心の奥で描いた
-# それが これから話す 陳腐なモノローグさ
+[Verse 1]
+きっと君はもう気づいていた
+僕の心の奥で描いた
+それが これから話す 陳腐なモノローグさ
 
-# [Verse 2]
-# ── ずっと言えない言葉があった
-# 壊せない壁があったんだ ずっとさ
-# ふっと香り立つ朝の匂いが
-# どうしようもなく憎らしくて
-# 部屋の隅で 膝を抱えて震えていた
-# 太陽なんていらないから
-# 明けないでいて ──
+[Verse 2]
+── ずっと言えない言葉があった
+壊せない壁があったんだ ずっとさ
+ふっと香り立つ朝の匂いが
+どうしようもなく憎らしくて
+部屋の隅で 膝を抱えて震えていた
+太陽なんていらないから
+明けないでいて ──
 
-# [Pre-Chorus]
-# その手を伸ばして 誰かに届くように
-# 僕だって君と同じ 特別なんかじゃないから
+[Pre-Chorus]
+その手を伸ばして 誰かに届くように
+僕だって君と同じ 特別なんかじゃないから
 
-# [Chorus]
-# そうさ 僕は夜を歌うよ Stellar-stellar
-# ありったけの輝きで
-# 今宵 音楽は ずっと ずっと 止まない
-# そうだ 僕がずっとなりたかったのは
-# 待ってるシンデレラじゃないさ
-# 迎えに行く王子様だ
-# だって僕は星だから
+[Chorus]
+そうさ 僕は夜を歌うよ Stellar-stellar
+ありったけの輝きで
+今宵 音楽は ずっと ずっと 止まない
+そうだ 僕がずっとなりたかったのは
+待ってるシンデレラじゃないさ
+迎えに行く王子様だ
+だって僕は星だから
 
-# [Verse 3]
-# なんて, ありふれた話なんだ
-# 理想だけ書き連ねていた
-# ノートの隅に眠る ほんのワンシーンだ
-# ── きっとあの星も泣いてるんだ
-# 明日なんて来ないままでいて ──
+[Verse 3]
+なんて, ありふれた話なんだ
+理想だけ書き連ねていた
+ノートの隅に眠る ほんのワンシーンだ
+── きっとあの星も泣いてるんだ
+明日なんて来ないままでいて ──
 
-# [Pre-Chorus]
-# その手を伸ばして 誰かに届くように
-# 本当に大切なものは
-# 目に見えないみたいなんだ
+[Pre-Chorus]
+その手を伸ばして 誰かに届くように
+本当に大切なものは
+目に見えないみたいなんだ
 
-# [Chorus]
-# そうさ 僕は夜を歌うよ Stellar-stellar
-# ありのまま考えないで
-# 今宵 音楽はきっときっと止まない
-# そうだ 僕がずっとなりたかったのは
-# あえかなヒロインじゃないさ
-# 救いに行くヒーローだ
+[Chorus]
+そうさ 僕は夜を歌うよ Stellar-stellar
+ありのまま考えないで
+今宵 音楽はきっときっと止まない
+そうだ 僕がずっとなりたかったのは
+あえかなヒロインじゃないさ
+救いに行くヒーローだ
 
-# [Bridge]
-# 夢見がちなおとぎ話
-# おとぎ話
+[Bridge]
+夢見がちなおとぎ話
+おとぎ話
 
-# [Chorus]
-# そうさ 僕は夜を歌うよ Stellar-stellar
-# ありったけの輝きで
-# 今宵 音楽はずっとずっと止まない
-# そうさ 僕は愛を歌うよ Stellar-stellar
-# 世界 宇宙の真ん中で
-# 今宵 音楽はきっときっと止まない
-# そうだ 僕がずっとなりたかったのは
-# 待ってるシンデレラじゃないさ
-# 迎えに行く王子様だ
-# だって僕は星だから
+[Chorus]
+そうさ 僕は夜を歌うよ Stellar-stellar
+ありったけの輝きで
+今宵 音楽はずっとずっと止まない
+そうさ 僕は愛を歌うよ Stellar-stellar
+世界 宇宙の真ん中で
+今宵 音楽はきっときっと止まない
+そうだ 僕がずっとなりたかったのは
+待ってるシンデレラじゃないさ
+迎えに行く王子様だ
+だって僕は星だから
 
-# [Outro]
-# そうだ僕は星だった
-# Stellar-stellar"""
+[Outro]
+そうだ僕は星だった
+Stellar-stellar"""
 
 # cleaned_lyrics = """
 # [Intro]
@@ -395,9 +405,9 @@ def lambda_handler(event, context):
 # 小さな光探してもがいてた夜 添い遂げた
 # そんな日々を謳い記したこの歌
 # """
-# lines = split_into_lines(cleaned_lyrics)
-# tokenized_lines = tokenize(lines)
-# word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
+lines = split_into_lines(cleaned_lyrics)
+tokenized_lines = tokenize(lines)
+word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
 
 # # print(word_mapping)
 # # print(lyrics)
