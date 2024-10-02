@@ -138,7 +138,7 @@ def process_tokenized_lines(lines):
                     aux_word = line[pos]
                     print(aux_word.surface, aux_word.feature, aux_word.pos, sep='\t')
                     final_word += aux_word.surface
-                    aux_furigana = conv.do(word.surface)
+                    aux_furigana = conv.do(aux_word.surface)
                     for info in word_info:
                         info['furigana'] += aux_furigana
                         info['romaji'] += kakasi.convert(aux_furigana)[0]["hepburn"]
@@ -371,7 +371,7 @@ def lambda_handler(event, context):
 # そうだ僕は星だった
 # Stellar-stellar"""
 
-cleaned_lyrics = """ 僕がいちばんなんにもないんだろう"""
+cleaned_lyrics = """添い遂げた"""
 lines = split_into_lines(cleaned_lyrics)
 tokenized_lines = tokenize(lines)
 word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
@@ -380,6 +380,6 @@ print(word_mapping)
 print(lyrics)
 
 
-# # pipe to a file
-# with open("word_mapping.json", "w") as f:
-#     json.dump(word_mapping, f, indent=4)
+# pipe to a file
+with open("word_mapping.json", "w") as f:
+    json.dump(word_mapping, f, indent=4)
