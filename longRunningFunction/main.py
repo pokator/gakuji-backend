@@ -180,22 +180,30 @@ def process_tokenized_lines(lines):
                 #         aux_meanings.append(aux_meaning)
 
             else:  # For other parts of speech (nouns, adjectives, etc.)
+                print(word.surface, word.feature, word.pos, sep='\t')
                 word_info = get_word_info(word.surface)
                 if len(word_info) > 0:
                     word_dict[word.surface] = word_info
                     new_line.append(word.surface)
                 else :
-                    temp_list = []
-                    temp_properties = {'pos': [word.pos], 'definition': ['not found']}
-                    temp_list.append({
-                        "idseq": "none",
-                        "word": word.surface,
-                        "furigana": conv.do(word.surface),
-                        "romaji": kakasi.convert(word.surface)[0]["hepburn"],
-                        "definitions": temp_properties
-                    })
-                    word_dict
-                    new_line.append(word.surface)
+                    print("lemma lookup")
+                    word_info = get_word_info(word.feature.lemma)
+                    if len(word_info) > 0:
+                        word_dict[word.surface] = word_info
+                        new_line.append(word.surface)
+                    else : 
+                        print("creating dummy data")
+                        temp_list = []
+                        temp_properties = {'pos': [word.pos], 'definition': ['not found']}
+                        temp_list.append({
+                            "idseq": "none",
+                            "word": word.surface,
+                            "furigana": conv.do(word.surface),
+                            "romaji": kakasi.convert(word.surface)[0]["hepburn"],
+                            "definitions": temp_properties
+                        })
+                        word_dict[word.surface] = temp_list
+                        new_line.append(word.surface)
                 pos += 1
                 # word_info = get_word_info(word.surface)
                 # # Store the current combined word before switching to the next word
@@ -371,7 +379,7 @@ def lambda_handler(event, context):
 # そうだ僕は星だった
 # Stellar-stellar"""
 
-cleaned_lyrics = """添い遂げた"""
+cleaned_lyrics = """僕がいちばんなんにもないんだろう"""
 lines = split_into_lines(cleaned_lyrics)
 tokenized_lines = tokenize(lines)
 word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
