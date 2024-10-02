@@ -381,23 +381,23 @@ def lambda_handler(event, context):
 # そうだ僕は星だった
 # Stellar-stellar"""
 
-cleaned_lyrics = """
-[Intro]
-僕がいちばんなんにもないんだろう
-君もいちばんなんにもないんだろう
-僕ら なんも なんも なんも なんも
-手にできてないんだろう
-小さな光探してもがいてた夜 添い遂げた
-そんな日々を謳い記したこの歌
-"""
-lines = split_into_lines(cleaned_lyrics)
-tokenized_lines = tokenize(lines)
-word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
+# cleaned_lyrics = """
+# [Intro]
+# 僕がいちばんなんにもないんだろう
+# 君もいちばんなんにもないんだろう
+# 僕ら なんも なんも なんも なんも
+# 手にできてないんだろう
+# 小さな光探してもがいてた夜 添い遂げた
+# そんな日々を謳い記したこの歌
+# """
+# lines = split_into_lines(cleaned_lyrics)
+# tokenized_lines = tokenize(lines)
+# word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
 
-# print(word_mapping)
-# print(lyrics)
+# # print(word_mapping)
+# # print(lyrics)
 
 
-# pipe to a file
-with open("word_mapping.json", "w") as f:
-    json.dump(word_mapping, f, indent=4)
+# # pipe to a file
+# with open("word_mapping.json", "w") as f:
+#     json.dump(word_mapping, f, indent=4)
