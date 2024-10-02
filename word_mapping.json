@@ -1,0 +1,1688 @@
+{
+    "\u50d5": [
+        {
+            "idseq": 1521390,
+            "word": "\u50d5",
+            "furigana": "\u3057\u3082\u3079",
+            "romaji": "shimobe",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "servant",
+                        "manservant",
+                        "menial"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 1521400,
+            "word": "\u50d5",
+            "furigana": "\u307c\u304f",
+            "romaji": "boku",
+            "definitions": [
+                {
+                    "pos": [
+                        "pronoun"
+                    ],
+                    "definition": [
+                        "I",
+                        "me"
+                    ]
+                },
+                {
+                    "pos": [
+                        "pronoun"
+                    ],
+                    "definition": [
+                        "you"
+                    ]
+                },
+                {
+                    "pos": [
+                        "pronoun"
+                    ],
+                    "definition": [
+                        "manservant"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 2055600,
+            "word": "\u50d5",
+            "furigana": "\u3084\u3064\u304c\u308c",
+            "romaji": "yatsugare",
+            "definitions": [
+                {
+                    "pos": [
+                        "pronoun"
+                    ],
+                    "definition": [
+                        "I",
+                        "me"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u304c": [
+        {
+            "idseq": 1197760,
+            "word": "\u86fe",
+            "furigana": "\u304c",
+            "romaji": "ga",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "moth"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 1202270,
+            "word": "\u7d75",
+            "furigana": "\u3048",
+            "romaji": "e",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "picture",
+                        "drawing",
+                        "painting",
+                        "sketch"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "image (TV, film, etc.)",
+                        "picture",
+                        "footage"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 2028930,
+            "word": "\u304c",
+            "furigana": "\u304c",
+            "romaji": "ga",
+            "definitions": [
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "indicates sentence subject (occasionally object)"
+                    ]
+                },
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "indicates possessive (esp. in literary expressions)"
+                    ]
+                },
+                {
+                    "pos": [
+                        "conjunction"
+                    ],
+                    "definition": [
+                        "but",
+                        "however",
+                        "still",
+                        "and"
+                    ]
+                },
+                {
+                    "pos": [
+                        "conjunction"
+                    ],
+                    "definition": [
+                        "regardless of",
+                        "whether (or not)"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u3044\u3061\u3070\u3093": [
+        {
+            "idseq": 1165970,
+            "word": "\u4e00\u756a",
+            "furigana": "\u3044\u3061\u3070\u3093",
+            "romaji": "ichiban",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)",
+                        "nouns which may take the genitive case particle 'no'"
+                    ],
+                    "definition": [
+                        "number one",
+                        "first",
+                        "first place"
+                    ]
+                },
+                {
+                    "pos": [
+                        "adverb (fukushi)"
+                    ],
+                    "definition": [
+                        "best",
+                        "most"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "game",
+                        "round",
+                        "bout"
+                    ]
+                },
+                {
+                    "pos": [
+                        "adverb (fukushi)"
+                    ],
+                    "definition": [
+                        "as a test",
+                        "as an experiment",
+                        "by way of experiment",
+                        "by way of trial",
+                        "tentatively"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "song (e.g. in noh)",
+                        "piece"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 1165980,
+            "word": "\u4e00\u756a",
+            "furigana": "\u3072\u3068\u3064\u304c\u3044",
+            "romaji": "hitotsugai",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "pair",
+                        "couple",
+                        "brace"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u306a\u3093\u306b": [
+        {
+            "idseq": 1577100,
+            "word": "\u4f55",
+            "furigana": "\u306a\u306b",
+            "romaji": "nani",
+            "definitions": [
+                {
+                    "pos": [
+                        "pronoun"
+                    ],
+                    "definition": [
+                        "what"
+                    ]
+                },
+                {
+                    "pos": [
+                        "pronoun"
+                    ],
+                    "definition": [
+                        "you-know-what",
+                        "that thing"
+                    ]
+                },
+                {
+                    "pos": [
+                        "pronoun"
+                    ],
+                    "definition": [
+                        "whatsit",
+                        "whachamacallit",
+                        "what's-his-name",
+                        "what's-her-name"
+                    ]
+                },
+                {
+                    "pos": [
+                        "adverb (fukushi)"
+                    ],
+                    "definition": [
+                        "(not) at all",
+                        "(not) in the slightest"
+                    ]
+                },
+                {
+                    "pos": [
+                        "interjection (kandoushi)"
+                    ],
+                    "definition": [
+                        "what?",
+                        "huh?"
+                    ]
+                },
+                {
+                    "pos": [
+                        "interjection (kandoushi)"
+                    ],
+                    "definition": [
+                        "hey!"
+                    ]
+                },
+                {
+                    "pos": [
+                        "interjection (kandoushi)"
+                    ],
+                    "definition": [
+                        "oh, no (it's fine)",
+                        "why (it's nothing)",
+                        "oh (certainly not)"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 2846738,
+            "word": "\u4f55",
+            "furigana": "\u306a\u3093",
+            "romaji": "nan",
+            "definitions": [
+                {
+                    "pos": [
+                        "pronoun"
+                    ],
+                    "definition": [
+                        "what"
+                    ]
+                },
+                {
+                    "pos": [
+                        "prefix"
+                    ],
+                    "definition": [
+                        "how many"
+                    ]
+                },
+                {
+                    "pos": [
+                        "prefix"
+                    ],
+                    "definition": [
+                        "many",
+                        "a lot of"
+                    ]
+                },
+                {
+                    "pos": [
+                        "prefix"
+                    ],
+                    "definition": [
+                        "several",
+                        "a few",
+                        "some"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u3082": [
+        {
+            "idseq": 1399250,
+            "word": "\u55aa",
+            "furigana": "\u3082",
+            "romaji": "mo",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)",
+                        "nouns which may take the genitive case particle 'no'"
+                    ],
+                    "definition": [
+                        "mourning"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "calamity",
+                        "misfortune"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 1402240,
+            "word": "\u85fb",
+            "furigana": "\u3082",
+            "romaji": "mo",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)",
+                        "nouns which may take the genitive case particle 'no'"
+                    ],
+                    "definition": [
+                        "algae",
+                        "waterweed",
+                        "seaweed",
+                        "duckweed"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 1584680,
+            "word": "\u9762",
+            "furigana": "\u304a\u3082\u3066",
+            "romaji": "omote",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "face"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "surface"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "mask (esp. a noh or kyogen mask)"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u306a\u3044": [
+        {
+            "idseq": 1529520,
+            "word": "\u7121\u3044",
+            "furigana": "\u306a\u3044",
+            "romaji": "nai",
+            "definitions": [
+                {
+                    "pos": [
+                        "adjective (keiyoushi)"
+                    ],
+                    "definition": [
+                        "nonexistent",
+                        "not being (there)"
+                    ]
+                },
+                {
+                    "pos": [
+                        "adjective (keiyoushi)"
+                    ],
+                    "definition": [
+                        "unowned",
+                        "not had",
+                        "unpossessed"
+                    ]
+                },
+                {
+                    "pos": [
+                        "adjective (keiyoushi)"
+                    ],
+                    "definition": [
+                        "unique"
+                    ]
+                },
+                {
+                    "pos": [
+                        "adjective (keiyoushi)"
+                    ],
+                    "definition": [
+                        "not",
+                        "impossible",
+                        "won't happen"
+                    ]
+                },
+                {
+                    "pos": [
+                        "auxiliary adjective"
+                    ],
+                    "definition": [
+                        "not"
+                    ]
+                },
+                {
+                    "pos": [
+                        "auxiliary adjective"
+                    ],
+                    "definition": [
+                        "to not be",
+                        "to have not"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u3093": [
+        {
+            "idseq": 1469800,
+            "word": "\u306e",
+            "furigana": "\u306e",
+            "romaji": "no",
+            "definitions": [
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "indicates possessive"
+                    ]
+                },
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "nominalizes verbs and adjectives"
+                    ]
+                },
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "substitutes for \"ga\" in subordinate phrases"
+                    ]
+                },
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "(at sentence-end, falling tone) indicates a confident conclusion"
+                    ]
+                },
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "(at sentence-end) indicates emotional emphasis"
+                    ]
+                },
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "(at sentence-end, rising tone) indicates question"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 1537250,
+            "word": "\u91ce",
+            "furigana": "\u306e",
+            "romaji": "no",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "plain",
+                        "field"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "hidden (structural) member"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun, used as a prefix"
+                    ],
+                    "definition": [
+                        "wild"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun, used as a prefix"
+                    ],
+                    "definition": [
+                        "lacking a political post"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 2270030,
+            "word": "\u4e43",
+            "furigana": "\u306e",
+            "romaji": "no",
+            "definitions": [
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "'s",
+                        "of",
+                        "belonging to"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u3060\u308d\u3046": [
+        {
+            "idseq": 1564200,
+            "word": "\u514c",
+            "furigana": "\u3060",
+            "romaji": "da",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "dui (one of the trigrams of the I Ching: swamp, west)"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 2089020,
+            "word": "\u3060",
+            "furigana": "\u3060",
+            "romaji": "da",
+            "definitions": [
+                {
+                    "pos": [
+                        "copula"
+                    ],
+                    "definition": [
+                        "be",
+                        "is"
+                    ]
+                },
+                {
+                    "pos": [
+                        "auxiliary verb"
+                    ],
+                    "definition": [
+                        "did",
+                        "(have) done"
+                    ]
+                },
+                {
+                    "pos": [
+                        "auxiliary verb"
+                    ],
+                    "definition": [
+                        "please",
+                        "do"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 2648880,
+            "word": "\u99c4",
+            "furigana": "\u3060",
+            "romaji": "da",
+            "definitions": [
+                {
+                    "pos": [
+                        "prefix"
+                    ],
+                    "definition": [
+                        "poor",
+                        "low-grade",
+                        "trivial",
+                        "insignificant",
+                        "worthless"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun, used as a suffix",
+                        "counter"
+                    ],
+                    "definition": [
+                        "load",
+                        "pack",
+                        "horse load"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "packhorse"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u541b": [
+        {
+            "idseq": 1247250,
+            "word": "\u541b",
+            "furigana": "\u304d\u307f",
+            "romaji": "kimi",
+            "definitions": [
+                {
+                    "pos": [
+                        "pronoun"
+                    ],
+                    "definition": [
+                        "you",
+                        "buddy",
+                        "pal"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "monarch",
+                        "ruler",
+                        "sovereign",
+                        "(one's) master"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 1247260,
+            "word": "\u541b",
+            "furigana": "\u304f\u3093",
+            "romaji": "kun",
+            "definitions": [
+                {
+                    "pos": [
+                        "suffix"
+                    ],
+                    "definition": [
+                        "Mr (junior)",
+                        "master",
+                        "boy"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 2697530,
+            "word": "\u541b",
+            "furigana": "\u304e\u307f",
+            "romaji": "gimi",
+            "definitions": [
+                {
+                    "pos": [
+                        "suffix"
+                    ],
+                    "definition": [
+                        "suffix appended to somebody else's family members"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u3089": [
+        {
+            "idseq": 1582300,
+            "word": "\u7b49",
+            "furigana": "\u306a\u3069",
+            "romaji": "nado",
+            "definitions": [
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "et cetera",
+                        "etc.",
+                        "and the like",
+                        "and so forth"
+                    ]
+                },
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "or something"
+                    ]
+                },
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "the likes of"
+                    ]
+                },
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "for example",
+                        "for instance",
+                        "for one"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 1582305,
+            "word": "\u7b49",
+            "furigana": "\u3068\u3046",
+            "romaji": "tou",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)",
+                        "noun, used as a suffix",
+                        "counter"
+                    ],
+                    "definition": [
+                        "class",
+                        "order",
+                        "rank"
+                    ]
+                },
+                {
+                    "pos": [
+                        "suffix"
+                    ],
+                    "definition": [
+                        "et cetera",
+                        "etc.",
+                        "and the like"
+                    ]
+                },
+                {
+                    "pos": [
+                        "prefix"
+                    ],
+                    "definition": [
+                        "equal",
+                        "iso-"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 2067770,
+            "word": "\u7b49",
+            "furigana": "\u3089",
+            "romaji": "ra",
+            "definitions": [
+                {
+                    "pos": [
+                        "suffix"
+                    ],
+                    "definition": [
+                        "pluralizing suffix"
+                    ]
+                },
+                {
+                    "pos": [
+                        "suffix"
+                    ],
+                    "definition": [
+                        "or so",
+                        "rough indicator of direction, location, amount, etc."
+                    ]
+                },
+                {
+                    "pos": [
+                        "suffix"
+                    ],
+                    "definition": [
+                        "nominalizing suffix"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u306a\u3093": [
+        {
+            "idseq": 1577100,
+            "word": "\u4f55",
+            "furigana": "\u306a\u306b",
+            "romaji": "nani",
+            "definitions": [
+                {
+                    "pos": [
+                        "pronoun"
+                    ],
+                    "definition": [
+                        "what"
+                    ]
+                },
+                {
+                    "pos": [
+                        "pronoun"
+                    ],
+                    "definition": [
+                        "you-know-what",
+                        "that thing"
+                    ]
+                },
+                {
+                    "pos": [
+                        "pronoun"
+                    ],
+                    "definition": [
+                        "whatsit",
+                        "whachamacallit",
+                        "what's-his-name",
+                        "what's-her-name"
+                    ]
+                },
+                {
+                    "pos": [
+                        "adverb (fukushi)"
+                    ],
+                    "definition": [
+                        "(not) at all",
+                        "(not) in the slightest"
+                    ]
+                },
+                {
+                    "pos": [
+                        "interjection (kandoushi)"
+                    ],
+                    "definition": [
+                        "what?",
+                        "huh?"
+                    ]
+                },
+                {
+                    "pos": [
+                        "interjection (kandoushi)"
+                    ],
+                    "definition": [
+                        "hey!"
+                    ]
+                },
+                {
+                    "pos": [
+                        "interjection (kandoushi)"
+                    ],
+                    "definition": [
+                        "oh, no (it's fine)",
+                        "why (it's nothing)",
+                        "oh (certainly not)"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 2846738,
+            "word": "\u4f55",
+            "furigana": "\u306a\u3093",
+            "romaji": "nan",
+            "definitions": [
+                {
+                    "pos": [
+                        "pronoun"
+                    ],
+                    "definition": [
+                        "what"
+                    ]
+                },
+                {
+                    "pos": [
+                        "prefix"
+                    ],
+                    "definition": [
+                        "how many"
+                    ]
+                },
+                {
+                    "pos": [
+                        "prefix"
+                    ],
+                    "definition": [
+                        "many",
+                        "a lot of"
+                    ]
+                },
+                {
+                    "pos": [
+                        "prefix"
+                    ],
+                    "definition": [
+                        "several",
+                        "a few",
+                        "some"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u624b": [
+        {
+            "idseq": 1327190,
+            "word": "\u624b",
+            "furigana": "\u3066",
+            "romaji": "te",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "hand",
+                        "arm"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "forepaw",
+                        "foreleg"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "handle"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "hand",
+                        "worker",
+                        "help"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "trouble",
+                        "care",
+                        "effort"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "means",
+                        "way",
+                        "trick",
+                        "move",
+                        "technique",
+                        "workmanship"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "hand",
+                        "handwriting"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "kind",
+                        "type",
+                        "sort"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "one's hands",
+                        "one's possession"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "ability to cope"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "hand (of cards)"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "direction"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)",
+                        "noun, used as a suffix",
+                        "counter"
+                    ],
+                    "definition": [
+                        "move (in go, shogi, etc.)"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u306b": [
+        {
+            "idseq": 1195250,
+            "word": "\u8377",
+            "furigana": "\u306b",
+            "romaji": "ni",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "load",
+                        "baggage",
+                        "cargo",
+                        "freight",
+                        "goods"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "burden",
+                        "responsibility"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 1314550,
+            "word": "\u4f3c",
+            "furigana": "\u306b",
+            "romaji": "ni",
+            "definitions": [
+                {
+                    "pos": [
+                        "suffix"
+                    ],
+                    "definition": [
+                        "looking like (someone)",
+                        "taking after (either of one's parents)"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 1416890,
+            "word": "\u4e39",
+            "furigana": "\u306b",
+            "romaji": "ni",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "red earth (i.e. containing cinnabar or minium)",
+                        "vermilion"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u3067\u304d\u3066\u306a\u3044\u3093\u3060\u308d\u3046": [
+        {
+            "idseq": 1340450,
+            "word": "\u51fa\u6765\u308b",
+            "furigana": "\u3067\u304d\u308b\u3066\u306a\u3044\u3093\u3060\u308d\u3046",
+            "romaji": "dekirutenaindarou",
+            "definitions": [
+                {
+                    "pos": [
+                        "Ichidan verb",
+                        "intransitive verb"
+                    ],
+                    "definition": "['to be able (in a position) to do', 'to be up to the task'] (negative) (assertion)"
+                },
+                {
+                    "pos": [
+                        "Ichidan verb",
+                        "intransitive verb"
+                    ],
+                    "definition": "['to be ready', 'to be completed'] (negative) (assertion)"
+                },
+                {
+                    "pos": [
+                        "Ichidan verb",
+                        "intransitive verb"
+                    ],
+                    "definition": "['to be made', 'to be built'] (negative) (assertion)"
+                },
+                {
+                    "pos": [
+                        "Ichidan verb",
+                        "intransitive verb"
+                    ],
+                    "definition": "['to be good at', 'to be permitted (to do)'] (negative) (assertion)"
+                },
+                {
+                    "pos": [
+                        "Ichidan verb",
+                        "intransitive verb"
+                    ],
+                    "definition": "['to become intimate', 'to take up (with somebody)'] (negative) (assertion)"
+                },
+                {
+                    "pos": [
+                        "Ichidan verb",
+                        "intransitive verb"
+                    ],
+                    "definition": "['to grow', 'to be raised'] (negative) (assertion)"
+                },
+                {
+                    "pos": [
+                        "Ichidan verb",
+                        "intransitive verb"
+                    ],
+                    "definition": "['to become pregnant'] (negative) (assertion)"
+                }
+            ]
+        }
+    ],
+    "\u5c0f\u3055\u306a": [
+        {
+            "idseq": 2136180,
+            "word": "\u5c0f\u3055\u306a",
+            "furigana": "\u3061\u3044\u3055\u306a",
+            "romaji": "chiisana",
+            "definitions": [
+                {
+                    "pos": [
+                        "pre-noun adjectival (rentaishi)"
+                    ],
+                    "definition": [
+                        "small",
+                        "little",
+                        "tiny"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u5149": [
+        {
+            "idseq": 1272780,
+            "word": "\u5149",
+            "furigana": "\u3072\u304b\u308a",
+            "romaji": "hikari",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "light"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "illumination",
+                        "ray",
+                        "beam",
+                        "gleam",
+                        "glow"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "happiness",
+                        "hope"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "influence",
+                        "power"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "vision",
+                        "eyesight"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u63a2\u3057\u3066": [
+        {
+            "idseq": 1593670,
+            "word": "\u63a2\u3059",
+            "furigana": "\u3055\u304c\u3059\u3066",
+            "romaji": "sagasute",
+            "definitions": [
+                {
+                    "pos": [
+                        "Godan verb with 'su' ending",
+                        "transitive verb"
+                    ],
+                    "definition": "['to search for', 'to look for', 'to hunt for', 'to seek'] (indicates continuing action\u200b)"
+                },
+                {
+                    "pos": [
+                        "Godan verb with 'su' ending",
+                        "transitive verb"
+                    ],
+                    "definition": "['to search (a house, pocket, etc.)', 'to search through', 'to rummage in (e.g. a drawer)', 'to fish around'] (indicates continuing action\u200b)"
+                }
+            ]
+        }
+    ],
+    "\u3082\u304c\u3044\u3066\u305f": [
+        {
+            "idseq": 1012490,
+            "word": "\u85fb\u63bb\u304f",
+            "furigana": "\u3082\u304c\u304f\u3066\u305f",
+            "romaji": "mogakuteta",
+            "definitions": [
+                {
+                    "pos": [
+                        "Godan verb with 'ku' ending",
+                        "intransitive verb"
+                    ],
+                    "definition": "['to struggle', 'to writhe', 'to wriggle', 'to squirm'] (past tense)"
+                },
+                {
+                    "pos": [
+                        "Godan verb with 'ku' ending",
+                        "intransitive verb"
+                    ],
+                    "definition": "['to act frantically', 'to make desperate efforts'] (past tense)"
+                }
+            ]
+        }
+    ],
+    "\u591c": [
+        {
+            "idseq": 1536350,
+            "word": "\u591c",
+            "furigana": "\u3088\u308b",
+            "romaji": "yoru",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)",
+                        "adverb (fukushi)"
+                    ],
+                    "definition": [
+                        "evening",
+                        "night"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "dinner"
+                    ]
+                }
+            ]
+        },
+        {
+            "idseq": 2827999,
+            "word": "\u591c",
+            "furigana": "\u3084",
+            "romaji": "ya",
+            "definitions": [
+                {
+                    "pos": [
+                        "counter"
+                    ],
+                    "definition": [
+                        "counter for nights"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u6dfb\u3044\u9042\u3052\u305f": [
+        {
+            "idseq": 1850570,
+            "word": "\u6dfb\u3044\u9042\u3052\u308b",
+            "furigana": "\u305d\u3044\u3068\u3052\u308b\u305f",
+            "romaji": "soitogeruta",
+            "definitions": [
+                {
+                    "pos": [
+                        "Ichidan verb",
+                        "intransitive verb"
+                    ],
+                    "definition": "['to remain married for life'] (past tense)"
+                }
+            ]
+        }
+    ],
+    "\u305d\u3093\u306a": [
+        {
+            "idseq": 1007130,
+            "word": "\u305d\u3093\u306a",
+            "furigana": "\u305d\u3093\u306a",
+            "romaji": "sonna",
+            "definitions": [
+                {
+                    "pos": [
+                        "pre-noun adjectival (rentaishi)"
+                    ],
+                    "definition": [
+                        "such",
+                        "that sort of",
+                        "that kind of",
+                        "like that"
+                    ]
+                },
+                {
+                    "pos": [
+                        "interjection (kandoushi)"
+                    ],
+                    "definition": [
+                        "no way!",
+                        "never!"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u65e5\u3005": [
+        {
+            "idseq": 1602120,
+            "word": "\u65e5\u3005",
+            "furigana": "\u3072\u3073",
+            "romaji": "hibi",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)",
+                        "adverb (fukushi)"
+                    ],
+                    "definition": [
+                        "every day",
+                        "daily",
+                        "day after day",
+                        "days (e.g. good old days)"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u3092": [
+        {
+            "idseq": 2029010,
+            "word": "\u3092",
+            "furigana": "\u3092",
+            "romaji": "wo",
+            "definitions": [
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "indicates direct object of action"
+                    ]
+                },
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "indicates subject of causative expression"
+                    ]
+                },
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "indicates an area traversed"
+                    ]
+                },
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "indicates time (period) over which action takes place"
+                    ]
+                },
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "indicates point of departure or separation of action"
+                    ]
+                },
+                {
+                    "pos": [
+                        "particle"
+                    ],
+                    "definition": [
+                        "indicates object of desire, like, hate, etc."
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u8b33\u3044": [
+        {
+            "idseq": 1588120,
+            "word": "\u6b4c\u3046",
+            "furigana": "\u3046\u305f\u3046",
+            "romaji": "utau",
+            "definitions": [
+                {
+                    "pos": [
+                        "Godan verb with 'u' ending",
+                        "transitive verb",
+                        "intransitive verb"
+                    ],
+                    "definition": [
+                        "to sing"
+                    ]
+                },
+                {
+                    "pos": [
+                        "Godan verb with 'u' ending",
+                        "transitive verb"
+                    ],
+                    "definition": [
+                        "to sing (one's praises in a poem, etc.)",
+                        "to compose a poem",
+                        "to recite a poem"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u8a18\u3057\u305f": [
+        {
+            "idseq": 1223140,
+            "word": "\u8a18\u3059",
+            "furigana": "\u3057\u308b\u3059\u305f",
+            "romaji": "shirusuta",
+            "definitions": [
+                {
+                    "pos": [
+                        "Godan verb with 'su' ending"
+                    ],
+                    "definition": "['to write down', 'to note', 'to jot down'] (past tense)"
+                },
+                {
+                    "pos": [
+                        "Godan verb with 'su' ending"
+                    ],
+                    "definition": "['to remember'] (past tense)"
+                }
+            ]
+        }
+    ],
+    "\u3053\u306e": [
+        {
+            "idseq": 1582920,
+            "word": "\u6b64\u306e",
+            "furigana": "\u3053\u306e",
+            "romaji": "kono",
+            "definitions": [
+                {
+                    "pos": [
+                        "pre-noun adjectival (rentaishi)"
+                    ],
+                    "definition": [
+                        "this"
+                    ]
+                },
+                {
+                    "pos": [
+                        "pre-noun adjectival (rentaishi)"
+                    ],
+                    "definition": [
+                        "last (couple of years, etc.)",
+                        "these",
+                        "past",
+                        "this"
+                    ]
+                },
+                {
+                    "pos": [
+                        "pre-noun adjectival (rentaishi)"
+                    ],
+                    "definition": [
+                        "you (as in \"you liar\")"
+                    ]
+                }
+            ]
+        }
+    ],
+    "\u6b4c": [
+        {
+            "idseq": 1193180,
+            "word": "\u6b4c",
+            "furigana": "\u3046\u305f",
+            "romaji": "uta",
+            "definitions": [
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "song"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "classical Japanese poetry (esp. tanka)"
+                    ]
+                },
+                {
+                    "pos": [
+                        "noun (common) (futsuumeishi)"
+                    ],
+                    "definition": [
+                        "modern poetry"
+                    ]
+                }
+            ]
+        }
+    ]
+}

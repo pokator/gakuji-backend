@@ -58,6 +58,8 @@ def tokenize(lines):
         # lyric_line = [word.surface for word in tagged_line]
         # lyric_list.append(lyric_line)
         # to_hiragana_list.append(conv.do(line))
+        for word in tagged_line:
+            print(word.surface, word.feature, word.pos, sep='\t')
         line_list.append(tagged_line)
     return line_list
 
@@ -181,13 +183,13 @@ def process_tokenized_lines(lines):
 
             else:  # For other parts of speech (nouns, adjectives, etc.)
                 print(word.surface, word.feature, word.pos, sep='\t')
-                word_info = get_word_info(word.surface)
+                word_info = get_word_info(word.feature.lemma)
                 if len(word_info) > 0:
                     word_dict[word.surface] = word_info
                     new_line.append(word.surface)
                 else :
-                    print("lemma lookup")
-                    word_info = get_word_info(word.feature.lemma)
+                    print("surface lookup")
+                    word_info = get_word_info(word.surface)
                     if len(word_info) > 0:
                         word_dict[word.surface] = word_info
                         new_line.append(word.surface)
@@ -379,15 +381,23 @@ def lambda_handler(event, context):
 # そうだ僕は星だった
 # Stellar-stellar"""
 
-# cleaned_lyrics = """僕がいちばんなんにもないんだろう"""
-# lines = split_into_lines(cleaned_lyrics)
-# tokenized_lines = tokenize(lines)
-# word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
+cleaned_lyrics = """
+[Intro]
+僕がいちばんなんにもないんだろう
+君もいちばんなんにもないんだろう
+僕ら なんも なんも なんも なんも
+手にできてないんだろう
+小さな光探してもがいてた夜 添い遂げた
+そんな日々を謳い記したこの歌
+"""
+lines = split_into_lines(cleaned_lyrics)
+tokenized_lines = tokenize(lines)
+word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
 
 # print(word_mapping)
 # print(lyrics)
 
 
-# # pipe to a file
-# with open("word_mapping.json", "w") as f:
-#     json.dump(word_mapping, f, indent=4)
+# pipe to a file
+with open("word_mapping.json", "w") as f:
+    json.dump(word_mapping, f, indent=4)
