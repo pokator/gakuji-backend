@@ -122,6 +122,7 @@ def process_tokenized_lines(lines):
             if word.surface in word_dict:
                 #efficiency modification - most songs will repeat words, why look them up again
                 print(f"Word already processed: {word.surface}")
+                new_line.append(word.surface)
                 pos += 1
                 continue
 
@@ -184,7 +185,7 @@ def process_tokenized_lines(lines):
                     new_line.append(word.surface)
                 else :
                     temp_list = []
-                    temp_properties = {'pos': word.pos, 'definition': ['not found']}
+                    temp_properties = {'pos': [word.pos], 'definition': ['not found']}
                     temp_list.append({
                         "idseq": "none",
                         "word": word.surface,
