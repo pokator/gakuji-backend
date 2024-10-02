@@ -65,7 +65,12 @@ def tokenize(lines):
 
 def get_word_info(word):
     print(f"Looking up word: {word}")
-    result = jam.lookup(word)
+    
+    try:
+        result = jam.lookup(word)
+    except Exception as e:
+        # print(f"Error in jamdict lookup: {e}")
+        return []
     word_info = []
     for entry in result.entries[:3]:  # Limit to 3 entries
         idseq = entry.idseq
