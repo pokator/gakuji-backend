@@ -116,6 +116,7 @@ def process_tokenized_lines(lines):
             # Get word information using lemma for definition lookup
             if not is_japanese(word.surface):
                 print(f"Skipping non-Japanese token: {word.surface}")
+                new_line.append(word.surface)
                 pos += 1
                 continue
             
