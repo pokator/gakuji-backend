@@ -379,15 +379,15 @@ def lambda_handler(event, context):
 # そうだ僕は星だった
 # Stellar-stellar"""
 
-cleaned_lyrics = """僕がいちばんなんにもないんだろう"""
-lines = split_into_lines(cleaned_lyrics)
-tokenized_lines = tokenize(lines)
-word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
+# cleaned_lyrics = """僕がいちばんなんにもないんだろう"""
+# lines = split_into_lines(cleaned_lyrics)
+# tokenized_lines = tokenize(lines)
+# word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
 
-print(word_mapping)
-print(lyrics)
+# print(word_mapping)
+# print(lyrics)
 
 
-# pipe to a file
-with open("word_mapping.json", "w") as f:
-    json.dump(word_mapping, f, indent=4)
+# # pipe to a file
+# with open("word_mapping.json", "w") as f:
+#     json.dump(word_mapping, f, indent=4)
