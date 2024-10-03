@@ -151,27 +151,38 @@ def create_word_return(idseq):
 @router.post("/add-song-spot")
 async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get_current_user), session = Depends(get_current_session)):
     uri = spotifyItem.uri
+    print(f"Received URI: {uri}")
     if uri is None or user is None:
+        print("Missing URI or user information.")
         return {"message": "Missing information. Please try again."}
 
     artist, song, image = await get_song_from_spotify(uri)
+    print(f"Retrieved from Spotify -> Artist: {artist}, Song: {song}, Image URL: {image}")
 
     # Check if the song already exists in the user's personal song table
     in_my_table = supabase.table("Song").select(count="exact").eq("title", song).eq("artist", artist).eq("id", user.id).execute().count
+    print(f"Song in user's table: {in_my_table}")
     if in_my_table:
+        print("Song already exists in user's table.")
         return {"message": "Song already in database for this user."}
 
     # Check if the song exists in the global SongData table
     in_table = supabase.table("SongData").select(count="exact").eq("title", song).eq("artist", artist).execute().count
+    print(f"Song in global SongData table: {in_table}")
     if not in_table:
         # Retrieve song data if it exists
+        print(f"Song not found in SongData. Fetching lyrics from Genius for: {song} by {artist}.")
         song_data = genius.search_song(song, artist)
         lyrics = song_data.lyrics
+        print(f"Retrieved lyrics: {lyrics[:100]}...")  # Print the first 100 characters of lyrics for brevity
 
         # Preparing for SQS send and getting Kanji
         cleaned_lyrics = clean_lyrics(lyrics)
+        print(f"Cleaned lyrics: {cleaned_lyrics[:100]}...")  # Print first 100 characters of cleaned lyrics
         kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
+        print(f"Kanji list: {kanji_list}")
         all_kanji_data = get_all_kanji_data(kanji_list)
+        print(f"All Kanji data: {all_kanji_data}")
 
         # Insert the song data into the global database only if it doesn't already exist
         response = supabase.table("SongData").insert({
@@ -183,8 +194,9 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
             "kanji_data": all_kanji_data, 
             "image_url": image
         }).execute()
-        
-        # send to SQS
+        print(f"Inserted into SongData: {response}")
+
+        # Send to SQS
         body = {
             "song": song,
             "artist": artist,
@@ -197,11 +209,14 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
         queue.send_message(
             MessageBody=json.dumps(body)
         )
+        print(f"Sent message to SQS queue: {body}")
 
     # Song has been successfully added to the global database, now add for the specific user
     response = supabase.table("Song").insert({"title": song, "artist": artist, "id": user.id}).execute()
+    print(f"Inserted into user's Song table: {response}")
     
     return response
+
    
 #need a route which takes in artist, song and, lyrics, processes the text, and adds the processed song to the database
 @router.post("/add-song-manual")
