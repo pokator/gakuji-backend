@@ -346,12 +346,12 @@ def lambda_handler(event, context):
 # cleaned_lyrics = """
 # 欲しがって
 # """
-lines = split_into_lines(cleaned_lyrics)
-tokenized_lines = tokenize(lines)
-word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
+# lines = split_into_lines(cleaned_lyrics)
+# tokenized_lines = tokenize(lines)
+# word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
 
-print(word_mapping)
-print(lyrics)
+# print(word_mapping)
+# print(lyrics)
 
 
 # # pipe to a file
