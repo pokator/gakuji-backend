@@ -77,7 +77,6 @@ def delete_before_line_break(s):
         return s[index + 2:]  # Slice the string from the position after the line break, and roll over to the next line
     else:
         return s  # If no line break is found, return the original string
-# result = delete_before_line_break(lyrics)[1:]
 
 #clean up common excess data brought in using the API.
 def clean_lyrics(lyrics):
@@ -155,34 +154,33 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
     if uri is None or user is None:
         return {"message": "Missing information. Please try again."}
     else:
-        
         artist, song, image = await get_song_from_spotify(uri)
+        #does this song exist in the database for this user?
         in_my_table = supabase.table("Song").select(count="exact").eq("title", song).eq("artist", artist).eq("id", user.id).execute().count
-        if in_my_table > 0:
-            return {"message": "Song already in database."}
+        if in_my_table:
+            return {"message": "Song already in database for this user."}
         else:
+            #does this song exist in the global database?
             in_table = supabase.table("SongData").select(count="exact").eq("title", song).eq("artist", artist).execute().count
-            if in_table == 0:
+            if in_table:
                 song_data = genius.search_song(song, artist)
                 lyrics = song_data.lyrics
+                
+                #preparing for SQS send and getting Kanji
                 cleaned_lyrics = clean_lyrics(lyrics)
-                # lines = split_into_lines(cleaned_lyrics)
-                # tokenized_lines, hiragana_lines = tokenize(lines)
                 kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
                 all_kanji_data = get_all_kanji_data(kanji_list)
-
                 
                 response = supabase.table("SongData").insert({"title": song, "artist": artist, "lyrics": None, "hiragana_lyrics": None, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image}).execute()
-                # word_mapping = process_tokenized_lines(tokenized_lines)
                 
+                #send to SQS
                 body = {"song": song, "artist": artist, "cleaned_lyrics": cleaned_lyrics, "access_token": session.access_token, "refresh_token": session.refresh_token}
-                
                 sqs = aws_session.resource('sqs')
                 queue = sqs.Queue(sqs_url)
                 queue.send_message(
-                    # QueueUrl=sqs_url,
                     MessageBody=json.dumps(body)
                 )
+            #song has been successfully added to global database, now add for the specific user
             response = supabase.table("Song").insert({"title": song, "artist": artist, "id": user.id}).execute()
             return response
     
@@ -207,22 +205,15 @@ async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_us
                 kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
                 all_kanji_data = get_all_kanji_data(kanji_list)
                       
-                # call long running SQS to process tokenized lines and add it to the database
                 response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": None, "hiragana_lyrics": None, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
-                # word_mapping = process_tokenized_lines(tokenized_lines)
-                # body = {"song": title, "artist": artist, "word_mapping": tokenized_lines, "uuid": supabase.auth.get_user().user.id}
-
                 
+                # call long running SQS to process tokenized lines and add it to the database
                 body = {"song": title, "artist": artist, "cleaned_lyrics": cleaned_lyrics, "access_token": session.access_token, "refresh_token": session.refresh_token}
-                
                 sqs = aws_session.resource('sqs')
                 queue = sqs.Queue(sqs_url)
                 queue.send_message(
-                    # QueueUrl=sqs_url,
                     MessageBody=json.dumps(body)
                 )
-                # response = supabase.table("Song").insert({"title": title, "artist": artist, "lyrics": cleaned_lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "uuid": supabase.auth.get_user().user.id, "image_url": image_url}).execute()
-                # response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": tokenized_lines, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
             response = supabase.table("Song").insert({"title": title, "artist": artist, "id": user.id}).execute()
             return response
 
@@ -252,6 +243,16 @@ async def get_word(idseq: str = None, user: User = Depends(get_current_user)): #
         return {"message": "No idseq provided"}
     
 #need a route which provides the hiragana for a given song. MAYBE NOT
+@router.get("/get-hiragana")
+async def get_hiragana(title: str = None, artist: str = None, user: User = Depends(get_current_user)):
+    if title is None or artist is None or user is None:
+        return {"message": "Missing information. Please try again."}
+    else:
+        response = supabase.table("SongData").select("hiragana_lyrics").eq("title", title).eq("artist", artist).execute()
+        if response.count == 0:
+            return {"message": "Song not found in database."}
+        else:
+            return response.data[0]
 
 #need a route which provides a list of songs from the database when requested for the particular user.
 @router.get("/get-songs")

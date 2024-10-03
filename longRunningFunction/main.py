@@ -112,11 +112,7 @@ def process_tokenized_lines(lines):
 
     for line in lines:
         new_line = []
-        # combined_word = ""
-        # combined_furigana = ""
-        # combined_romaji = ""
-        # combined_word_info = []
-        # aux_meanings = []
+
         pos = 0
         while pos < len(line):
             word = line[pos]
@@ -146,11 +142,14 @@ def process_tokenized_lines(lines):
 
             print(f"Processing word: {word.surface}, Lemma: {word.feature.lemma}, POS1: {word.feature.pos1}")
 
-            if word.feature.pos1 == '動詞':  # Main verb detection
+            if word.feature.pos1 == '動詞' or word.feature.pos1 == '形容詞':  # Main verb detection
                 word_info = get_word_info(word.feature.lemma)
+                for info in word_info:
+                    info['furigana'] = conv.do(word.surface)
+                    info['romaji'] = kakasi.convert(word.surface)[0]["hepburn"]
                 final_word = word.surface
                 pos += 1
-                while pos< len(line) and line[pos].surface in AUXILIARIES:
+                while pos < len(line) and (line[pos].surface in AUXILIARIES or line[pos].feature.pos1 == '接尾辞'):
                     # we have found an auxiliary verb. Need to reflect in main verb's definitions, furigana, and romaji
                     aux_word = line[pos]
                     print(aux_word.surface, aux_word.feature, aux_word.pos, sep='\t')
@@ -167,35 +166,16 @@ def process_tokenized_lines(lines):
                     pos += 1
                 word_dict[final_word] = word_info
                 new_line.append(final_word)
-                # If there's an unfinished verb+auxiliary sequence, store it
-                # if combined_word:
-                #     word_dict[combined_word] = {
-                #         "idseq": combined_word_info[0]['idseq'],
-                #         "word": combined_word,
-                #         "furigana": conv.do(combined_furigana),
-                #         "romaji": kakasi.convert(combined_furigana)[0]["hepburn"],
-                #         "definitions": modify_definitions(combined_word_info[0]['definitions'], aux_meanings)
-                #     }
 
-                # Reset combined data for the new verb
-                # combined_word = word.surface
-                # combined_furigana = word.feature.kana
-                # combined_romaji = word.feature.pronBase
-                # combined_word_info = word_info
-                # aux_meanings = []
-
-                # elif word.feature.pos1 == '助動詞':  # Auxiliary verb detection
-                #     # Combine auxiliary verb with main verb
-                #     combined_word += word.surface
-                #     combined_furigana += word.feature.kana
-                #     combined_romaji += word.feature.pronBase
-
-                #     # Get auxiliary lemma and check for its meaning
-                #     aux_lemma = word.feature.lemma
-                #     aux_meaning = AUXILIARIES.get(aux_lemma)
-                #     if aux_meaning:
-                #         aux_meanings.append(aux_meaning)
-
+            elif word.feature.pos1 == '接尾辞':  # Suffix detection
+                print(word.surface, word.feature, word.pos, sep='\t')
+                noun = line[pos - 1]
+                suffix = word
+                word_info = get_word_info(noun.surface + suffix.surface)
+                word_dict[noun.surface + suffix.surface] = word_info
+                new_line.pop()
+                new_line.append(word_info)
+                pos += 1
             else:  # For other parts of speech (nouns, adjectives, etc.)
                 print(word.surface, word.feature, word.pos, sep='\t')
                 word_info = get_word_info(word.surface)
@@ -222,42 +202,9 @@ def process_tokenized_lines(lines):
                         word_dict[word.surface] = temp_list
                         new_line.append(word.surface)
                 pos += 1
-                # word_info = get_word_info(word.surface)
-                # # Store the current combined word before switching to the next word
-                # if combined_word:
-                #     word_dict[combined_word] = {
-                #         "idseq": combined_word_info[0]['idseq'],
-                #         "word": combined_word,
-                #         "furigana": conv.do(combined_furigana),
-                #         "romaji": kakasi.convert(combined_furigana)[0]["hepburn"],
-                #         "definitions": modify_definitions(combined_word_info[0]['definitions'], aux_meanings)
-                #     }
 
-                # # Add the current word (non-verb) to the dictionary
-                # if len(word_info) > 0:
-                #     word_dict[word.surface] = {
-                #         "idseq": word_info[0]['idseq'],
-                #         "word": word_info[0]['word'],
-                #         "furigana": word_info[0]['furigana'],
-                #         "romaji": word_info[0]['romaji'],
-                #         "definitions": word_info[0]['definitions']
-                #     }
-
-                # # Reset combined variables for future use
-                # combined_word = ""
-                # combined_furigana = ""
-                # combined_romaji = ""
-                # aux_meanings = []
         lyrics.append(new_line)
-        # Store any remaining combined word+auxiliary sequence after processing the line
-        # if combined_word:
-        #     word_dict[combined_word] = {
-        #         "idseq": combined_word_info[0]['idseq'],
-        #         "word": combined_word,
-        #         "furigana": conv.do(combined_furigana),
-        #         "romaji": kakasi.convert(combined_furigana)[0]["hepburn"],
-        #         "definitions": modify_definitions(combined_word_info[0]['definitions'], aux_meanings)
-        #     }
+
 
     return word_dict, lyrics
 
@@ -397,22 +344,94 @@ def lambda_handler(event, context):
 # Stellar-stellar"""
 
 # cleaned_lyrics = """
-# [Intro]
-# 僕がいちばんなんにもないんだろう
-# 君もいちばんなんにもないんだろう
-# 僕ら なんも なんも なんも なんも
-# 手にできてないんだろう
-# 小さな光探してもがいてた夜 添い遂げた
-# そんな日々を謳い記したこの歌
+# 欲しがって
 # """
-# lines = split_into_lines(cleaned_lyrics)
-# tokenized_lines = tokenize(lines)
-# word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
+lines = split_into_lines(cleaned_lyrics)
+tokenized_lines = tokenize(lines)
+word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
 
-# # print(word_mapping)
-# # print(lyrics)
+print(word_mapping)
+print(lyrics)
 
 
 # # pipe to a file
 # with open("word_mapping.json", "w") as f:
 #     json.dump(word_mapping, f, indent=4)
+
+
+
+# previously generated by ChatGPT (incorrectly)
+
+        # combined_word = ""
+        # combined_furigana = ""
+        # combined_romaji = ""
+        # combined_word_info = []
+        # aux_meanings = []
+                # If there's an unfinished verb+auxiliary sequence, store it
+                # if combined_word:
+                #     word_dict[combined_word] = {
+                #         "idseq": combined_word_info[0]['idseq'],
+                #         "word": combined_word,
+                #         "furigana": conv.do(combined_furigana),
+                #         "romaji": kakasi.convert(combined_furigana)[0]["hepburn"],
+                #         "definitions": modify_definitions(combined_word_info[0]['definitions'], aux_meanings)
+                #     }
+
+                # Reset combined data for the new verb
+                # combined_word = word.surface
+                # combined_furigana = word.feature.kana
+                # combined_romaji = word.feature.pronBase
+                # combined_word_info = word_info
+                # aux_meanings = []
+
+                # elif word.feature.pos1 == '助動詞':  # Auxiliary verb detection
+                #     # Combine auxiliary verb with main verb
+                #     combined_word += word.surface
+                #     combined_furigana += word.feature.kana
+                #     combined_romaji += word.feature.pronBase
+
+                #     # Get auxiliary lemma and check for its meaning
+                #     aux_lemma = word.feature.lemma
+                #     aux_meaning = AUXILIARIES.get(aux_lemma)
+                #     if aux_meaning:
+                #         aux_meanings.append(aux_meaning)
+
+
+
+                # word_info = get_word_info(word.surface)
+                # # Store the current combined word before switching to the next word
+                # if combined_word:
+                #     word_dict[combined_word] = {
+                #         "idseq": combined_word_info[0]['idseq'],
+                #         "word": combined_word,
+                #         "furigana": conv.do(combined_furigana),
+                #         "romaji": kakasi.convert(combined_furigana)[0]["hepburn"],
+                #         "definitions": modify_definitions(combined_word_info[0]['definitions'], aux_meanings)
+                #     }
+
+                # # Add the current word (non-verb) to the dictionary
+                # if len(word_info) > 0:
+                #     word_dict[word.surface] = {
+                #         "idseq": word_info[0]['idseq'],
+                #         "word": word_info[0]['word'],
+                #         "furigana": word_info[0]['furigana'],
+                #         "romaji": word_info[0]['romaji'],
+                #         "definitions": word_info[0]['definitions']
+                #     }
+
+                # # Reset combined variables for future use
+                # combined_word = ""
+                # combined_furigana = ""
+                # combined_romaji = ""
+                # aux_meanings = []
+                
+                
+        # Store any remaining combined word+auxiliary sequence after processing the line
+        # if combined_word:
+        #     word_dict[combined_word] = {
+        #         "idseq": combined_word_info[0]['idseq'],
+        #         "word": combined_word,
+        #         "furigana": conv.do(combined_furigana),
+        #         "romaji": kakasi.convert(combined_furigana)[0]["hepburn"],
+        #         "definitions": modify_definitions(combined_word_info[0]['definitions'], aux_meanings)
+        #     }
