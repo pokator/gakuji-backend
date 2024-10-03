@@ -163,7 +163,7 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
 
     # Check if the song exists in the global SongData table
     in_table = supabase.table("SongData").select(count="exact").eq("title", song).eq("artist", artist).execute().count
-    if in_table:
+    if not in_table:
         # Retrieve song data if it exists
         song_data = genius.search_song(song, artist)
         lyrics = song_data.lyrics
@@ -183,27 +183,23 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
             "kanji_data": all_kanji_data, 
             "image_url": image
         }).execute()
-    else:
-        # If the song is not in SongData, we may need to handle this case
-        # Consider if you want to add logic to retrieve and store data for this new song
-        return {"message": "Song not found in global database, please add it first."}
+        
+        # send to SQS
+        body = {
+            "song": song,
+            "artist": artist,
+            "cleaned_lyrics": cleaned_lyrics,
+            "access_token": session.access_token,
+            "refresh_token": session.refresh_token
+        }
+        sqs = aws_session.resource('sqs')
+        queue = sqs.Queue(sqs_url)
+        queue.send_message(
+            MessageBody=json.dumps(body)
+        )
 
     # Song has been successfully added to the global database, now add for the specific user
     response = supabase.table("Song").insert({"title": song, "artist": artist, "id": user.id}).execute()
-    
-    # Optionally send to SQS
-    body = {
-        "song": song,
-        "artist": artist,
-        "cleaned_lyrics": cleaned_lyrics,
-        "access_token": session.access_token,
-        "refresh_token": session.refresh_token
-    }
-    sqs = aws_session.resource('sqs')
-    queue = sqs.Queue(sqs_url)
-    queue.send_message(
-        MessageBody=json.dumps(body)
-    )
     
     return response
    
