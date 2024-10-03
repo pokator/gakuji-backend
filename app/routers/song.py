@@ -153,37 +153,60 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
     uri = spotifyItem.uri
     if uri is None or user is None:
         return {"message": "Missing information. Please try again."}
+
+    artist, song, image = await get_song_from_spotify(uri)
+
+    # Check if the song already exists in the user's personal song table
+    in_my_table = supabase.table("Song").select(count="exact").eq("title", song).eq("artist", artist).eq("id", user.id).execute().count
+    if in_my_table:
+        return {"message": "Song already in database for this user."}
+
+    # Check if the song exists in the global SongData table
+    in_table = supabase.table("SongData").select(count="exact").eq("title", song).eq("artist", artist).execute().count
+    if in_table:
+        # Retrieve song data if it exists
+        song_data = genius.search_song(song, artist)
+        lyrics = song_data.lyrics
+
+        # Preparing for SQS send and getting Kanji
+        cleaned_lyrics = clean_lyrics(lyrics)
+        kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
+        all_kanji_data = get_all_kanji_data(kanji_list)
+
+        # Insert the song data into the global database only if it doesn't already exist
+        response = supabase.table("SongData").insert({
+            "title": song, 
+            "artist": artist, 
+            "lyrics": None, 
+            "hiragana_lyrics": None, 
+            "word_mapping": None, 
+            "kanji_data": all_kanji_data, 
+            "image_url": image
+        }).execute()
     else:
-        artist, song, image = await get_song_from_spotify(uri)
-        #does this song exist in the database for this user?
-        in_my_table = supabase.table("Song").select(count="exact").eq("title", song).eq("artist", artist).eq("id", user.id).execute().count
-        if in_my_table:
-            return {"message": "Song already in database for this user."}
-        else:
-            #does this song exist in the global database?
-            in_table = supabase.table("SongData").select(count="exact").eq("title", song).eq("artist", artist).execute().count
-            if in_table:
-                song_data = genius.search_song(song, artist)
-                lyrics = song_data.lyrics
-                
-                #preparing for SQS send and getting Kanji
-                cleaned_lyrics = clean_lyrics(lyrics)
-                kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
-                all_kanji_data = get_all_kanji_data(kanji_list)
-                
-                response = supabase.table("SongData").insert({"title": song, "artist": artist, "lyrics": None, "hiragana_lyrics": None, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image}).execute()
-                
-                #send to SQS
-                body = {"song": song, "artist": artist, "cleaned_lyrics": cleaned_lyrics, "access_token": session.access_token, "refresh_token": session.refresh_token}
-                sqs = aws_session.resource('sqs')
-                queue = sqs.Queue(sqs_url)
-                queue.send_message(
-                    MessageBody=json.dumps(body)
-                )
-            #song has been successfully added to global database, now add for the specific user
-            response = supabase.table("Song").insert({"title": song, "artist": artist, "id": user.id}).execute()
-            return response
+        # If the song is not in SongData, we may need to handle this case
+        # Consider if you want to add logic to retrieve and store data for this new song
+        return {"message": "Song not found in global database, please add it first."}
+
+    # Song has been successfully added to the global database, now add for the specific user
+    response = supabase.table("Song").insert({"title": song, "artist": artist, "id": user.id}).execute()
     
+    # Optionally send to SQS
+    body = {
+        "song": song,
+        "artist": artist,
+        "cleaned_lyrics": cleaned_lyrics,
+        "access_token": session.access_token,
+        "refresh_token": session.refresh_token
+    }
+    sqs = aws_session.resource('sqs')
+    queue = sqs.Queue(sqs_url)
+    queue.send_message(
+        MessageBody=json.dumps(body)
+    )
+    
+    return response
+   
 #need a route which takes in artist, song and, lyrics, processes the text, and adds the processed song to the database
 @router.post("/add-song-manual")
 async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_user), session = Depends(get_current_session)):
