@@ -15,6 +15,7 @@ class CreateUser(BaseModel):
 class SpotifyAdd(BaseModel):
     uri: str | None = None
     refresh_token: str | None = None
+    access_token: str | None = None
     
 class ManualAdd(BaseModel):
     title: str

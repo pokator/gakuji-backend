@@ -133,7 +133,7 @@ def create_word_return(idseq):
             definition.append(sense_gloss["text"])
         word_property = {
             "pos": pos,
-            "defintion": definition
+            "definition": definition
         }
         word_properties.append(word_property)
         
@@ -152,8 +152,9 @@ def create_word_return(idseq):
 async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get_current_user)):
     uri = spotifyItem.uri
     refresh_token = spotifyItem.refresh_token
-    session = get_current_session(refresh_token)
-    if uri is None or user is None or session is None:
+    access_token = spotifyItem.access_token
+    # session = await get_current_session(access_token, refresh_token)
+    if uri is None or user is None:
         return {"message": "Missing information. Please try again."}
 
     artist, song, image = await get_song_from_spotify(uri)
@@ -191,8 +192,8 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
             "song": song,
             "artist": artist,
             "cleaned_lyrics": cleaned_lyrics,
-            "access_token": session.access_token,
-            "refresh_token": session.refresh_token
+            "access_token": access_token,
+            "refresh_token": refresh_token
         }
         sqs = aws_session.resource('sqs')
         queue = sqs.Queue(sqs_url)
