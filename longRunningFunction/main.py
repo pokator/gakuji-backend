@@ -8,21 +8,101 @@ import fugashi
 import re
 
 AUXILIARIES = {
-    'れる': 'passive', 'られる': 'passive', 'せる': 'causative',
-    'させる': 'causative', 'た': 'past tense', 'ます': 'polite',
-    'ました': 'polite past', 'たい': 'desire', 'たがる': '3rd person desire',
-    'なかった': 'past negative', 'ない': 'negative', 'ません': 'negative polite',
-    'ぬ': 'negative archaic', 'ん': 'negative colloquial', 'う': 'volitional',
-    'よう': 'volitional', 'だろう': 'probability', 'でしょう': 'probability polite',
-    'たいです': 'desire polite', 'らしい': 'hearsay', 'はず': 'expectation',
-    'べき': 'obligation', 'そう': 'appearance', 'まい': 'negative volitional',
-    'える': 'potential', 'られる': 'potential', 'おる': 'humble',
-    'おります': 'humble polite', 'くださる': 'honorific', 'です': 'copula polite',
-    'でございます': 'formal copula', 'かもしれない': 'possibility', 'だ': 'assertion',
-    'であった': 'assertion past', 'でいる': 'continuous', 'でいた': 'continuous past',
-    'ございます': 'politeness', 'やがる': 'disdain', 'ちまう': 'completion (casual)',
-    'てしまう': 'completion', 'て': 'indicates continuing action​', 'で': 'indicates continuing action​' # Add more as needed based on specific usage scenarios
+    'れる': 'passive',
+    'られる': 'passive/potential',
+    'せる': 'causative',
+    'させる': 'causative',
+    'た': 'past tense',
+    'ます': 'polite',
+    'ました': 'polite past',
+    'たい': 'desire',
+    'たがる': '3rd person desire',
+    'なかった': 'past negative',
+    'ない': 'negative',
+    'ません': 'negative polite',
+    'ぬ': 'negative archaic',
+    'ん': 'negative colloquial',
+    'う': 'volitional',
+    'よう': 'volitional',
+    'だろう': 'probability',
+    'でしょう': 'probability polite',
+    'たいです': 'desire polite',
+    'らしい': 'hearsay',
+    'はず': 'expectation',
+    'べき': 'obligation',
+    'そう': 'appearance',
+    'まい': 'negative volitional',
+    'える': 'potential',
+    'おる': 'humble',
+    'おります': 'humble polite',
+    'くださる': 'honorific',
+    'です': 'copula polite',
+    'でございます': 'formal copula',
+    'かもしれない': 'possibility',
+    'だ': 'assertion',
+    'であった': 'assertion past',
+    'でいる': 'continuous',
+    'でいた': 'continuous past',
+    'ございます': 'politeness',
+    'やがる': 'disdain',
+    'ちまう': 'completion (casual)',
+    'てしまう': 'completion',
+    'て': 'indicates continuing action​',
+    'で': 'indicates continuing action​',
+    'とく': 'do in advance (informal)',
+    'ちゃう': 'casual completion (from てしまう)',
+    'じゃう': 'casual completion (from でしまう)',
+    'ず': 'negative (classical/formal)',
+    'ずに': 'without doing (negative)',
+    'けり': 'classical past/realization',
+    'な': 'imperative negative',
+    'なさい': 'polite imperative (request)',
+    'さ': 'informal volitional/command',
+    'であろう': 'formal probability',
+    'のだ': 'explanatory/assertive tone',
+    'んだ': 'casual explanatory tone (from のだ)',
+    'か': 'question marker',
+    'かい': 'informal question (masculine)',
+    'だっけ': 'recollection/uncertainty',
+    'たっけ': 'casual past question',
+    'なければならない': 'must/obligation',
+    'なくてもいい': 'optional (doesn’t have to)',
+    'つもり': 'intention',
+    'べし': 'strong obligation (classical)',
+    'き': 'past experience (classical)',
+    'まじ': 'negative intent/conjecture (classical)',
+    'がる': 'shows feelings/desire (3rd person)',
+    'そうだ': 'hearsay',
+    'だって': 'even if/after all/because',
+    'ければ': 'conditional (if)',
+    'たら': 'conditional (if/when)',
+    'なら': 'hypothetical/conditional',
+    'とけ': 'command form of ておけ (in advance)',
+    'うち': 'within a period of time (while)',
+    'ように': 'so that (wish or command)',
+    'べく': 'in order to (formal)',
+    'まま': 'as it is/unchanged',
+    'とも': 'even if',
+    'すぎる': 'excessive/too much',
+    'がち': 'tend to/prone to',
+    'がたい': 'difficult to do',
+    'らしいです': 'polite hearsay',
+    'すれば': 'if done',
+    'けど': 'but/although',
+    'ながら': 'while doing',
+    'ところ': 'about to do/just did',
+    'しなければならない': 'must do',
+    'てもいい': 'it’s okay to do',
+    'つづける': 'to continue doing',
+    'ばかり': 'just done (recently)',
+    'ことがある': 'there are times when',
+    'にくい': 'difficult to do (emotionally)',
+    'やすい': 'easy to do',
+    'おわる': 'to finish doing',
+    'はじまる': 'to begin doing',
+    'でしかない': 'nothing but/only'
 }
+
 
 load_dotenv()
 
@@ -149,8 +229,8 @@ def process_tokenized_lines(lines):
                     info['romaji'] = kakasi.convert(word.surface)[0]["hepburn"]
                 final_word = word.surface
                 pos += 1
-                while pos < len(line) and (line[pos].surface in AUXILIARIES or line[pos].feature.pos1 == '接尾辞'):
-                    # we have found an auxiliary verb. Need to reflect in main verb's definitions, furigana, and romaji
+                while pos < len(line) and ((line[pos].surface in AUXILIARIES and line[pos].feature.pos1 == '助動詞') or line[pos].feature.pos1 == '接尾辞'):
+                    # we have found a bound auxiliary. Need to reflect in main verb's definitions, furigana, and romaji
                     aux_word = line[pos]
                     print(aux_word.surface, aux_word.feature, aux_word.pos, sep='\t')
                     final_word += aux_word.surface
@@ -346,15 +426,15 @@ def lambda_handler(event, context):
 # 傘を閉じて 濡れて帰ろうよ
 # """
 
-# cleaned_lyrics = """
-# 欲しがって
-# """
-# lines = split_into_lines(cleaned_lyrics)
-# tokenized_lines = tokenize(lines)
-# word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
-# hiragana_lines = convert_to_hiragana(lyrics)
-# print(word_mapping)
-# print(lyrics)
+cleaned_lyrics = """
+語っとけば
+"""
+lines = split_into_lines(cleaned_lyrics)
+tokenized_lines = tokenize(lines)
+word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
+hiragana_lines = convert_to_hiragana(lyrics)
+print(word_mapping)
+print(lyrics)
 
 
 # # pipe to a file
