@@ -427,7 +427,7 @@ def lambda_handler(event, context):
 # """
 
 cleaned_lyrics = """
-語っとけば
+ない
 """
 lines = split_into_lines(cleaned_lyrics)
 tokenized_lines = tokenize(lines)

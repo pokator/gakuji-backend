@@ -42,15 +42,24 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     except Exception as e:
         print(e)  # Handle exceptions appropriately
         raise credential_exception
-
-async def get_current_session(token: str = Depends(oauth2_scheme)):
-    credential_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    return supabase.auth.get_session()
-
+    
+async def get_current_session(refresh_token: str, token: str = Depends(oauth2_scheme)):
+    try:
+        session = supabase.auth.set_session(token, refresh_token)
+        if not session:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired session",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        return session
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Could not validate credentials: {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
 @router.get("/current-user")
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
