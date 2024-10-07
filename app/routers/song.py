@@ -85,6 +85,7 @@ def clean_lyrics(lyrics):
     lyrics = re.sub(r'You might also like', '', lyrics)
     # Remove "number followed by Embed"
     lyrics = re.sub(r'\d+Embed', '', lyrics)
+    lyrics = re.sub(r'Embed', '', lyrics)
     return lyrics
 
 
@@ -153,12 +154,9 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
     uri = spotifyItem.uri
     refresh_token = spotifyItem.refresh_token
     access_token = spotifyItem.access_token
-    # session = await get_current_session(access_token, refresh_token)
-    if uri is None or user is None:
+    if spotifyItem is None or user is None:
         return {"message": "Missing information. Please try again."}
-
     artist, song, image = await get_song_from_spotify(uri)
-
     # Check if the song already exists in the user's personal song table
     in_my_table = supabase.table("Song").select(count="exact").eq("title", song).eq("artist", artist).eq("id", user.id).execute().count
     if in_my_table:
@@ -208,36 +206,52 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
    
 #need a route which takes in artist, song and, lyrics, processes the text, and adds the processed song to the database
 @router.post("/add-song-manual")
-async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_user), session = Depends(get_current_session)):
+async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_user)):
     title = manual.title
     artist = manual.artist
     lyrics = manual.lyrics
-    if title is None or artist is None or lyrics is None or user is None:
+    refresh_token = manual.refresh_token
+    access_token = manual.access_token
+    if manual is None or user is None:
         return {"message": "Missing information. Please try again."}
-    else:
-        in_my_table = supabase.table("Song").select(count="exact").eq("title", title).eq("artist", artist).eq("id", user.id).execute().count
-        if in_my_table > 0:
-            return {"message": "Song already in database."}
-        else:
-            in_table = supabase.table("SongData").select(count="exact").eq("title", title).eq("artist", artist).execute().count
-            if in_table == 0:
-                # song not in global database
-                image_url = get_image(artist, title)
-                cleaned_lyrics = clean_lyrics(lyrics)
-                kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
-                all_kanji_data = get_all_kanji_data(kanji_list)
-                      
-                response = supabase.table("SongData").insert({"title": title, "artist": artist, "lyrics": None, "hiragana_lyrics": None, "word_mapping": None, "kanji_data": all_kanji_data, "image_url": image_url}).execute()
-                
-                # call long running SQS to process tokenized lines and add it to the database
-                body = {"song": title, "artist": artist, "cleaned_lyrics": cleaned_lyrics, "access_token": session.access_token, "refresh_token": session.refresh_token}
-                sqs = aws_session.resource('sqs')
-                queue = sqs.Queue(sqs_url)
-                queue.send_message(
-                    MessageBody=json.dumps(body)
-                )
-            response = supabase.table("Song").insert({"title": title, "artist": artist, "id": user.id}).execute()
-            return response
+    in_my_table = supabase.table("Song").select(count="exact").eq("title", title).eq("artist", artist).eq("id", user.id).execute().count
+    if in_my_table > 0:
+        return {"message": "Song already in database."}
+    
+    in_table = supabase.table("SongData").select(count="exact").eq("title", title).eq("artist", artist).execute().count
+    if not in_table:
+        # song not in global database
+        image_url = get_image(artist, title)
+        cleaned_lyrics = clean_lyrics(lyrics)
+        kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
+        all_kanji_data = get_all_kanji_data(kanji_list)
+        
+        response = supabase.table("SongData").insert({
+            "title": title, 
+            "artist": artist, 
+            "lyrics": None, 
+            "hiragana_lyrics": None, 
+            "word_mapping": None, 
+            "kanji_data": all_kanji_data, 
+            "image_url": image_url
+        }).execute()
+        # call long running SQS to process tokenized lines and add it to the database
+        
+         # send to SQS
+        body = {
+            "song": title,
+            "artist": artist,
+            "cleaned_lyrics": cleaned_lyrics,
+            "access_token": access_token,
+            "refresh_token": refresh_token
+        }
+        sqs = aws_session.resource('sqs')
+        queue = sqs.Queue(sqs_url)
+        queue.send_message(
+            MessageBody=json.dumps(body)
+        )
+    response = supabase.table("Song").insert({"title": title, "artist": artist, "id": user.id}).execute()
+    return response
 
 #need a route which provides a desired song from the database when requested. provides the lyrics and the mapping of word to idseq and kanji dictionary.
 @router.get("/get-song")

@@ -22,6 +22,8 @@ class ManualAdd(BaseModel):
     artist: str
     uuid: str | None = None
     lyrics: str
+    refresh_token: str | None = None
+    access_token: str | None = None
     
 class WordAdd(BaseModel):
     word: str

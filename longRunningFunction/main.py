@@ -100,9 +100,29 @@ AUXILIARIES = {
     'やすい': 'easy to do',
     'おわる': 'to finish doing',
     'はじまる': 'to begin doing',
-    'でしかない': 'nothing but/only'
+    'でしかない': 'nothing but/only',
+    'だっ': 'casual past form of です',
+    'な': 'adjectival ending',
+    'の': 'nominalizer',
+    'てる': 'ている, informal',
+    'ちゃ': 'てしまう, casual',
 }
 
+SUFFIX_DICT = {
+    "的": "suffix used to form adjectives, indicating 'like' or 'of'",
+    "ら": "suffix used to indicate plurality, often for people",
+    "たち": "suffix indicating a group or plural form, often for people",
+    "君": "suffix used to address someone in a friendly or familiar manner, often for younger people",
+    "様": "suffix used to indicate respect, often used for customers or clients",
+    "性": "suffix indicating 'nature' or 'characteristics', used in nouns to denote quality",
+    "者": "suffix meaning 'person', often used in titles or to describe someone",
+    "用": "suffix indicating 'use' or 'for the purpose of', used in nouns",
+    "風": "suffix meaning 'style' or 'manner', often used to denote a particular way of doing something",
+    "体": "suffix indicating 'body' or 'form', used in nouns related to physical structures or states",
+    "学": "suffix indicating 'study' or 'science', used in nouns related to fields of study",
+    "所": "suffix meaning 'place' or 'location', often used in nouns to denote a specific location",
+    "式": "suffix meaning 'style' or 'system', used in nouns to denote a particular method or system",
+}
 
 load_dotenv()
 
@@ -186,6 +206,14 @@ def is_japanese(text):
     # Regex to match Hiragana, Katakana, Kanji, and Japanese punctuation
     return re.match(r'[\u3040-\u30FF\u4E00-\u9FFF\uFF00-\uFFEF]', text)
 
+'''
+This function handles the processing of the lyrics once they are tokenized. There's a lot of edge
+cases here, so the logic loops through every line in the lyrics, and every lyric in the line. 
+My current best option is to handle part of speech cases individually. 
+
+TODO: consider integrating JISHO dictionary instead of Jamdict for more accurate, common definitions
+TODO: handle more edge cases for suffixes and other parts of speech
+'''
 def process_tokenized_lines(lines):
     word_dict = {}
     lyrics = []
@@ -222,14 +250,19 @@ def process_tokenized_lines(lines):
 
             print(f"Processing word: {word.surface}, Lemma: {word.feature.lemma}, POS1: {word.feature.pos1}")
 
-            if word.feature.pos1 == '動詞' or word.feature.pos1 == '形容詞':  # Main verb detection
+            if (word.feature.pos1 == '動詞' 
+                or word.feature.pos1 == '形容詞' 
+                or (word.feature.pos1 == '名詞' and word.feature.pos3 == '形状詞可能')
+                or word.feature.pos1 == '形状詞'
+                or word.feature.pos1 == '形容詞'):
+                # Verbs, adjectives, adjectival nouns.
                 word_info = get_word_info(word.feature.lemma)
                 for info in word_info:
                     info['furigana'] = conv.do(word.surface)
                     info['romaji'] = kakasi.convert(word.surface)[0]["hepburn"]
                 final_word = word.surface
                 pos += 1
-                while pos < len(line) and ((line[pos].surface in AUXILIARIES and line[pos].feature.pos1 == '助動詞') or line[pos].feature.pos1 == '接尾辞'):
+                while pos < len(line) and ((line[pos].surface in AUXILIARIES and line[pos].feature.pos1 == '助動詞') or line[pos].feature.pos1 == '接尾辞' or line[pos].surface in ['て', 'で', 'ん','ちゃ']):
                     # we have found a bound auxiliary. Need to reflect in main verb's definitions, furigana, and romaji
                     aux_word = line[pos]
                     print(aux_word.surface, aux_word.feature, aux_word.pos, sep='\t')
@@ -252,9 +285,30 @@ def process_tokenized_lines(lines):
                 noun = line[pos - 1]
                 suffix = word
                 word_info = get_word_info(noun.surface + suffix.surface)
-                word_dict[noun.surface + suffix.surface] = word_info
-                new_line.pop()
-                new_line.append(noun.surface + suffix.surface)
+                if len(word_info) > 0:
+                    # the combined word exists.
+                    word_dict[noun.surface + suffix.surface] = word_info
+                    new_line.pop()
+                    new_line.append(noun.surface + suffix.surface)
+                elif suffix.surface in SUFFIX_DICT:
+                    # the suffix is a known suffix
+                    temp_list = []
+                    temp_properties = {'pos': ["Suffix"], 'definition': [SUFFIX_DICT[suffix.surface]]}
+                    temp_list.append({
+                        "idseq": "none",
+                        "word": suffix.surface,
+                        "furigana": conv.do(suffix.surface),
+                        "romaji": kakasi.convert(suffix.surface)[0]["hepburn"],
+                        "definitions": temp_properties
+                    })
+                    word_dict[suffix.surface] = temp_list
+                    new_line.append(suffix.surface)
+                else:
+                    # the suffix is not one of the commons, so we will look up the suffix alone
+                    suffix_info = get_word_info(suffix.surface)
+                    if len(suffix_info) > 0:
+                        word_dict[suffix.surface] = suffix_info
+                        new_line.append(suffix.surface)
                 pos += 1
             else:  # For other parts of speech (nouns, adjectives, etc.)
                 print(word.surface, word.feature, word.pos, sep='\t')
@@ -263,13 +317,13 @@ def process_tokenized_lines(lines):
                     word_dict[word.surface] = word_info
                     new_line.append(word.surface)
                 else :
-                    print("surface lookup")
+                    # print("lemma lookup")
                     word_info = get_word_info(word.feature.lemma)
                     if len(word_info) > 0:
                         word_dict[word.surface] = word_info
                         new_line.append(word.surface)
                     else : 
-                        print("creating dummy data")
+                        # print("creating dummy data")
                         temp_list = []
                         temp_properties = {'pos': [word.pos], 'definition': ['not found']}
                         temp_list.append({
@@ -427,7 +481,7 @@ def lambda_handler(event, context):
 # """
 
 cleaned_lyrics = """
-ない
+いつか
 """
 lines = split_into_lines(cleaned_lyrics)
 tokenized_lines = tokenize(lines)
