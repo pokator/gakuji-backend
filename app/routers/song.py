@@ -301,7 +301,7 @@ async def get_songs(user: User = Depends(get_current_user)):
 
 
 @router.get("/get-global-songs")
-async def get_global_songs(limit: int = 10, offset: int = 0, user: User = Depends(get_current_user)):
+async def get_global_songs(limit: int = 50, offset: int = 0, user: User = Depends(get_current_user)):
     if limit == None or offset == None:
         return {"message": "Missing information. Please try again."}
     else:
