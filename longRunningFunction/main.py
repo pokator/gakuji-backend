@@ -166,7 +166,7 @@ def tokenize(lines):
     return line_list
 
 #TODO: use the JISHO API for more accurate definitions
-def get_word_info(word):
+def get_word_info(word, type="word"):
     print(f"Looking up word: {word}")
     
     try:
@@ -176,6 +176,8 @@ def get_word_info(word):
     word_info = []
     for entry in result.entries[:3]: 
         common = False
+        if type == "particle" and not ("conjunction" in entry.senses[0].pos or "particle" in entry.senses[0].pos):
+            continue
         for kanji in entry.kanji_forms:
             #kanji contains text and info
             if kanji.text == word and kanji.pri and "news1" in kanji.pri:
@@ -291,7 +293,6 @@ def process_tokenized_lines(lines):
                     pos += 1
                 word_dict[final_word] = word_info
                 new_line.append(final_word)
-
             elif word.feature.pos1 == '接尾辞':  # Suffix detection
                 print(word.surface, word.feature, word.pos, sep='\t')
                 noun = line[pos - 1]
@@ -321,6 +322,15 @@ def process_tokenized_lines(lines):
                     if len(suffix_info) > 0:
                         word_dict[suffix.surface] = suffix_info
                         new_line.append(suffix.surface)
+                pos += 1
+            elif word.feature.pos1 == '助詞':  # Particle detection
+                print(word.surface, word.feature, word.pos, sep='\t')
+                word_info = get_word_info(word.surface, type="particle")
+                
+                if len(word_info) > 0:
+                    word_dict[word.surface] = word_info
+                    new_line.append(word.surface)
+                
                 pos += 1
             else:  # For other parts of speech (nouns, adjectives, etc.)
                 print(word.surface, word.feature, word.pos, sep='\t')
@@ -492,15 +502,15 @@ def lambda_handler(event, context):
 # 傘を閉じて 濡れて帰ろうよ
 # """
 
-# cleaned_lyrics = """
-# 僕
-# """
-# lines = split_into_lines(cleaned_lyrics)
-# tokenized_lines = tokenize(lines)
-# word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
-# hiragana_lines = convert_to_hiragana(lyrics)
-# print(word_mapping)
-# print(lyrics)
+cleaned_lyrics = """
+たった一つ夢が叶うなら
+"""
+lines = split_into_lines(cleaned_lyrics)
+tokenized_lines = tokenize(lines)
+word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
+hiragana_lines = convert_to_hiragana(lyrics)
+print(word_mapping)
+print(lyrics)
 
 
 # # pipe to a file
