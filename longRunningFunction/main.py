@@ -106,6 +106,8 @@ AUXILIARIES = {
     'の': 'nominalizer',
     'てる': 'ている, informal',
     'ちゃ': 'てしまう, casual',
+    'せる': 'causative',
+    'せ': 'causative',
 }
 
 SUFFIX_DICT = {
@@ -163,22 +165,28 @@ def tokenize(lines):
         line_list.append(tagged_line)
     return line_list
 
+#TODO: use the JISHO API for more accurate definitions
 def get_word_info(word):
     print(f"Looking up word: {word}")
     
     try:
         result = jam.lookup(word)
     except Exception as e:
-        # print(f"Error in jamdict lookup: {e}")
         return []
     word_info = []
-    for entry in result.entries[:3]:  # Limit to 3 entries
+    for entry in result.entries[:3]: 
+        common = False
+        for kanji in entry.kanji_forms:
+            #kanji contains text and info
+            if kanji.text == word and kanji.pri and "news1" in kanji.pri:
+                common = True
+                break
+        # Limit to 3 entries
         idseq = entry.idseq
         if entry.kanji_forms:
             word_text = entry.kanji_forms[0].text
         else:
             word_text = entry.kana_forms[0].text
-
         furigana = entry.kana_forms[0].text
         romaji = kakasi.convert(furigana)[0]["hepburn"]
         word_properties = []
@@ -197,7 +205,11 @@ def get_word_info(word):
             "romaji": romaji,
             "definitions": word_properties
         }
-        word_info.append(entry_result)
+        if(common):
+            word_info.insert(0, entry_result)
+        else:
+            word_info.append(entry_result)
+        # word_info.append(entry_result)
 
     print(f"Word info retrieved: {word_info}")
     return word_info
@@ -480,15 +492,15 @@ def lambda_handler(event, context):
 # 傘を閉じて 濡れて帰ろうよ
 # """
 
-cleaned_lyrics = """
-いつか
-"""
-lines = split_into_lines(cleaned_lyrics)
-tokenized_lines = tokenize(lines)
-word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
-hiragana_lines = convert_to_hiragana(lyrics)
-print(word_mapping)
-print(lyrics)
+# cleaned_lyrics = """
+# 僕
+# """
+# lines = split_into_lines(cleaned_lyrics)
+# tokenized_lines = tokenize(lines)
+# word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
+# hiragana_lines = convert_to_hiragana(lyrics)
+# print(word_mapping)
+# print(lyrics)
 
 
 # # pipe to a file
