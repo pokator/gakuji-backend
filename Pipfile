@@ -19,6 +19,7 @@ puchikarui = "*"
 boto3 = "*"
 python-dotenv = "*"
 python-multipart = "*"
+geniusdotpy = "*"
 
 [dev-packages]
 

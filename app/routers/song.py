@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import os
 from typing import Union
 from lyricsgenius import Genius
+from geniusdotpy.genius import Genius as GeniusSearch 
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from jamdict import Jamdict
@@ -36,6 +37,7 @@ genius_token = os.getenv("GENIUS_ACCESS_TOKEN")
 client_credentials_manager = SpotifyClientCredentials(client_id=cid, client_secret=secret)
 sp = spotipy.Spotify(client_credentials_manager = client_credentials_manager)
 genius = Genius(genius_token)
+genius_search = GeniusSearch(client_access_token=genius_token)
 jam = Jamdict(memory_mode=True)
 tagger = fugashi.Tagger()
 kakasi = pykakasi.kakasi()
@@ -68,6 +70,23 @@ def get_image(artist, title):
     track = sp.search(q=query, limit=1, offset=0, type="track", market="JP")
     return track['tracks']['items'][0]['album']['images'][0]['url']
 
+def get_lyrics(artist, title):
+    songs = genius_search.search(title)
+    id = None
+    for track in songs:
+        if track.artist.name == artist:
+            id = track.id
+            break
+    
+    if id is not None:
+        other_source = genius.search_song(song_id=id)
+        lyrics = other_source.lyrics  
+        return lyrics  
+    else:
+        #desperate times...
+        other_source = genius.search_song(title, artist)
+        lyrics = other_source.lyrics
+        return lyrics
 
 # artist, song = get_song("https://open.spotify.com/track/3kUWZiVYJ4YQOl0u7Y1Og8?si=66716aec7c7447e0")
 
@@ -166,7 +185,7 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
     in_table = supabase.table("SongData").select(count="exact").eq("title", song).eq("artist", artist).execute().count
     if not in_table:
         # Retrieve song data if it exists
-        song_data = genius.search_song(song, artist)
+        song_data = get_lyrics(song, artist)
         lyrics = song_data.lyrics
 
         # Preparing for SQS send and getting Kanji
