@@ -73,8 +73,8 @@ def get_image(artist, title):
 def get_lyrics(artist, title):
     songs = genius_search.search(title)
     id = None
-    for track in songs:
-        if track.artist.name == artist:
+    for track in songs :
+        if track.artist.name == artist and 'Romanized' not in track.title and 'English Translation' not in track.title:
             id = track.id
             break
     

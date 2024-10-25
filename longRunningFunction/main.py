@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import fugashi
 import re
 
+#TODO: ensure these meanings are accurate.
 AUXILIARIES = {
     'れる': 'passive',
     'られる': 'passive/potential',
@@ -155,19 +156,26 @@ def tokenize(lines):
     # to_hiragana_list = []
     # lyric_list = []
     for line in lines:
-        print(f"Tokenizing line: {line}")
+        # print(f"Tokenizing line: {line}")
         tagged_line = tagger(line)
         # lyric_line = [word.surface for word in tagged_line]
         # lyric_list.append(lyric_line)
         # to_hiragana_list.append(conv.do(line))
-        for word in tagged_line:
-            print(word.surface, word.feature, word.pos, sep='\t')
+        # for word in tagged_line:
+        #     print(word.surface, word.feature, word.pos, sep='\t')
         line_list.append(tagged_line)
     return line_list
 
-#TODO: use the JISHO API for more accurate definitions
+'''
+This function queries the dictionary for a word and returns the information.
+There are still some edge cases to handle here - for example, particles and conjunctions
+are not always found in the dictionary.
+
+TODO: Make considerations on JISHO API (maybe query it when JMDict fails)
+TODO: Make an edge case dictionary (for words that get incorrectly tokenized)
+'''
 def get_word_info(word, type="word"):
-    print(f"Looking up word: {word}")
+    # print(f"Looking up word: {word}")
     
     try:
         result = jam.lookup(word)
@@ -211,9 +219,8 @@ def get_word_info(word, type="word"):
             word_info.insert(0, entry_result)
         else:
             word_info.append(entry_result)
-        # word_info.append(entry_result)
 
-    print(f"Word info retrieved: {word_info}")
+    # print(f"Word info retrieved: {word_info}")
     return word_info
 
 def is_japanese(text):
@@ -240,7 +247,7 @@ def process_tokenized_lines(lines):
             word = line[pos]
             # Get word information using lemma for definition lookup
             if not is_japanese(word.surface):
-                print(f"Skipping non-Japanese token: {word.surface}")
+                # print(f"Skipping non-Japanese token: {word.surface}")
                 temp_list = []
                 temp_properties = {'pos': ["Not Applicable"], 'definition': ['not found']}
                 temp_list.append({
@@ -257,29 +264,33 @@ def process_tokenized_lines(lines):
             
             if word.surface in word_dict:
                 #efficiency modification - most songs will repeat words, why look them up again
-                print(f"Word already processed: {word.surface}")
+                # print(f"Word already processed: {word.surface}")
                 new_line.append(word.surface)
                 pos += 1
                 continue
 
-            print(f"Processing word: {word.surface}, Lemma: {word.feature.lemma}, POS1: {word.feature.pos1}")
-
+            # print(f"Processing word: {word.surface}, Lemma: {word.feature.lemma}, POS1: {word.feature.pos1}")
+            
+            # Verbs, adjectives, adjectival nouns.
             if (word.feature.pos1 == '動詞' 
                 or word.feature.pos1 == '形容詞' 
                 or (word.feature.pos1 == '名詞' and word.feature.pos3 == '形状詞可能')
                 or word.feature.pos1 == '形状詞'
                 or word.feature.pos1 == '形容詞'):
-                # Verbs, adjectives, adjectival nouns.
+                
+                #retrieve definition from dictionary.
                 word_info = get_word_info(word.feature.lemma)
                 for info in word_info:
                     info['furigana'] = conv.do(word.surface)
                     info['romaji'] = kakasi.convert(word.surface)[0]["hepburn"]
                 final_word = word.surface
                 pos += 1
+                
+                #continue through the line to check for auxiliaries. 
                 while pos < len(line) and ((line[pos].surface in AUXILIARIES and line[pos].feature.pos1 == '助動詞') or line[pos].feature.pos1 == '接尾辞' or line[pos].surface in ['て', 'で', 'ん','ちゃ']):
                     # we have found a bound auxiliary. Need to reflect in main verb's definitions, furigana, and romaji
                     aux_word = line[pos]
-                    print(aux_word.surface, aux_word.feature, aux_word.pos, sep='\t')
+                    # print(aux_word.surface, aux_word.feature, aux_word.pos, sep='\t')
                     final_word += aux_word.surface
                     aux_furigana = conv.do(aux_word.surface)
                     for info in word_info:
@@ -293,8 +304,9 @@ def process_tokenized_lines(lines):
                     pos += 1
                 word_dict[final_word] = word_info
                 new_line.append(final_word)
-            elif word.feature.pos1 == '接尾辞':  # Suffix detection
-                print(word.surface, word.feature, word.pos, sep='\t')
+            # Suffix detection
+            elif word.feature.pos1 == '接尾辞':  
+                # print(word.surface, word.feature, word.pos, sep='\t')
                 noun = line[pos - 1]
                 suffix = word
                 word_info = get_word_info(noun.surface + suffix.surface)
@@ -324,7 +336,7 @@ def process_tokenized_lines(lines):
                         new_line.append(suffix.surface)
                 pos += 1
             elif word.feature.pos1 == '助詞':  # Particle detection
-                print(word.surface, word.feature, word.pos, sep='\t')
+                # print(word.surface, word.feature, word.pos, sep='\t')
                 word_info = get_word_info(word.surface, type="particle")
                 
                 if len(word_info) > 0:
@@ -333,7 +345,7 @@ def process_tokenized_lines(lines):
                 
                 pos += 1
             else:  # For other parts of speech (nouns, adjectives, etc.)
-                print(word.surface, word.feature, word.pos, sep='\t')
+                # print(word.surface, word.feature, word.pos, sep='\t')
                 word_info = get_word_info(word.surface)
                 if len(word_info) > 0:
                     word_dict[word.surface] = word_info
@@ -360,11 +372,9 @@ def process_tokenized_lines(lines):
                 pos += 1
 
         lyrics.append(new_line)
-
-
     return word_dict, lyrics
 
-
+# Modify definitions to include auxiliary meanings
 def modify_definitions(definitions_list, aux_meanings):
     if aux_meanings:
         for i, definition in enumerate(definitions_list):
@@ -381,6 +391,10 @@ def convert_to_hiragana(lyrics):
         hiragana_lyrics.append(hiragana_line)
     return hiragana_lyrics
 
+'''
+The main processing code. SQS will send a message to this lambda function, which will then process the lyrics.
+The lyrics are split into lines, tokenized, and then processed. The processed lyrics are then updated in the database.
+'''
 def lambda_handler(event, context):
     try:
         # print("Lambda handler invoked.")
@@ -407,7 +421,6 @@ def lambda_handler(event, context):
             hiragana_lines = convert_to_hiragana(lyrics)
 
             supabase.auth.set_session(access_token, refresh_token)
-            # print(f"Updating database for song: {song} by {artist}")
             response = supabase.table("SongData").update({
                 "lyrics": lyrics, "hiragana_lyrics": hiragana_lines, "word_mapping": word_mapping
             }).eq("title", song).eq("artist", artist).execute()
@@ -503,7 +516,7 @@ def lambda_handler(event, context):
 # """
 
 cleaned_lyrics = """
-たった一つ夢が叶うなら
+僕
 """
 lines = split_into_lines(cleaned_lyrics)
 tokenized_lines = tokenize(lines)
