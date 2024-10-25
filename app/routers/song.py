@@ -185,8 +185,7 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
     in_table = supabase.table("SongData").select(count="exact").eq("title", song).eq("artist", artist).execute().count
     if not in_table:
         # Retrieve song data if it exists
-        song_data = get_lyrics(song, artist)
-        lyrics = song_data.lyrics
+        lyrics = get_lyrics(song, artist)
 
         # Preparing for SQS send and getting Kanji
         cleaned_lyrics = clean_lyrics(lyrics)
