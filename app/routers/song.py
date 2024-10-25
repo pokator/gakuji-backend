@@ -38,6 +38,8 @@ client_credentials_manager = SpotifyClientCredentials(client_id=cid, client_secr
 sp = spotipy.Spotify(client_credentials_manager = client_credentials_manager)
 genius = Genius(genius_token)
 genius_search = GeniusSearch(client_access_token=genius_token)
+genius_search.excluded_terms = ["Romanized", "English", "Translation"]
+
 jam = Jamdict(memory_mode=True)
 tagger = fugashi.Tagger()
 kakasi = pykakasi.kakasi()
@@ -74,7 +76,7 @@ def get_lyrics(artist, title):
     songs = genius_search.search(title)
     id = None
     for track in songs :
-        if track.artist.name == artist and 'Romanized' not in track.title and 'English Translation' not in track.title:
+        if track.artist.name == artist:
             id = track.id
             break
     
