@@ -37,9 +37,9 @@ genius_token = os.getenv("GENIUS_ACCESS_TOKEN")
 client_credentials_manager = SpotifyClientCredentials(client_id=cid, client_secret=secret)
 sp = spotipy.Spotify(client_credentials_manager = client_credentials_manager)
 genius = Genius(genius_token)
-genius_search = GeniusSearch(client_access_token=genius_token)
-genius_search.excluded_terms = ["Romanized", "English", "Translation"]
 
+genius_search = GeniusSearch(client_access_token=genius_token)
+genius_search.excluded_terms = ["Romanized", "English", "Translation", "Türkçe", "Português"]
 jam = Jamdict(memory_mode=True)
 tagger = fugashi.Tagger()
 kakasi = pykakasi.kakasi()
@@ -99,7 +99,6 @@ def get_lyrics(artist, title):
         return lyrics
     else:
         return None
-# artist, song = get_song("https://open.spotify.com/track/3kUWZiVYJ4YQOl0u7Y1Og8?si=66716aec7c7447e0")
 
 def delete_before_line_break(s):
     index = s.find('\n')  # Find the position of the first line break
