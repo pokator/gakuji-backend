@@ -17,6 +17,12 @@ class SpotifyAdd(BaseModel):
     refresh_token: str | None = None
     access_token: str | None = None
     
+class SearchAdd(BaseModel):
+    title: str
+    artist: str
+    refresh_token: str | None = None
+    access_token: str | None = None    
+
 class ManualAdd(BaseModel):
     title: str
     artist: str

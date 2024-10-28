@@ -2,7 +2,7 @@ from fastapi import Body, Depends, status, HTTPException, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from db.supabase import create_supabase_client
 from app.dbmodels import User
-from app.models import Token, CreateUser, SpotifyAdd, ManualAdd
+from app.models import Token, CreateUser, SpotifyAdd, ManualAdd, SearchAdd
 from dotenv import load_dotenv
 import os
 from typing import Union
@@ -46,7 +46,11 @@ kakasi = pykakasi.kakasi()
 kakasi.setMode("J", "H")
 kakasi.setMode("K", "H")
 conv = kakasi.getConverter()
+
 CONST_KANJI = r'[㐀-䶵一-鿋豈-頻]'
+HIRAGANA_FULL = r'[ぁ-ゟ]'
+KATAKANA_FULL = r'[゠-ヿ]'
+
 aws_session = boto3.Session(
     aws_access_key_id=os.getenv("AWS_SERVER_PUBLIC_KEY"),
     aws_secret_access_key=os.getenv("AWS_SERVER_SECRET_KEY"),
@@ -67,7 +71,7 @@ async def get_song_from_spotify(uri):
     image = track['album']['images'][0]['url']
     return artist, song, image
 
-def get_image(artist, title):
+def get_image_from_spotify(artist, title):
     query = f"track:{title} artist:{artist}"
     track = sp.search(q=query, limit=1, offset=0, type="track", market="JP")
     return track['tracks']['items'][0]['album']['images'][0]['url']
@@ -75,21 +79,23 @@ def get_image(artist, title):
 def get_lyrics(artist, title):
     songs = genius_search.search(title)
     id = None
-    for track in songs :
+    for track in songs:
         if track.artist.name == artist:
             id = track.id
             break
-    
+    lyrics = None
     if id is not None:
         other_source = genius.search_song(song_id=id)
         lyrics = other_source.lyrics  
-        return lyrics  
     else:
         #desperate times...
         other_source = genius.search_song(title, artist)
         lyrics = other_source.lyrics
-        return lyrics
 
+    if CONST_KANJI in lyrics or HIRAGANA_FULL in lyrics or KATAKANA_FULL in lyrics:
+        return lyrics
+    else:
+        return None
 # artist, song = get_song("https://open.spotify.com/track/3kUWZiVYJ4YQOl0u7Y1Og8?si=66716aec7c7447e0")
 
 def delete_before_line_break(s):
@@ -187,7 +193,10 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
     in_table = supabase.table("SongData").select(count="exact").eq("title", song).eq("artist", artist).execute().count
     if not in_table:
         # Retrieve song data if it exists
-        lyrics = get_lyrics(song, artist)
+        lyrics = get_lyrics(artist, song)
+        
+        if lyrics is None:
+            return {"message": "No lyrics found for this song."}
 
         # Preparing for SQS send and getting Kanji
         cleaned_lyrics = clean_lyrics(lyrics)
@@ -223,6 +232,67 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
     response = supabase.table("Song").insert({"title": song, "artist": artist, "id": user.id}).execute()
     print(response)
     return response
+
+#need a route which takes in artist and title, searches, and adds the processed song to the database.
+@router.post("/add-song-search")
+async def add_song_search(searchItem: SearchAdd = None, user: User = Depends(get_current_user)):
+    refresh_token = searchItem.refresh_token
+    access_token = searchItem.access_token
+    artist = searchItem.artist
+    title = searchItem.title
+    if searchItem is None or user is None:
+        return {"message": "Missing information. Please try again."}
+    # Check if the song already exists in the user's personal song table
+    in_my_table = supabase.table("Song").select(count="exact").eq("title", title).eq("artist", artist).eq("id", user.id).execute().count
+    if in_my_table:
+        return {"message": "Song already in database for this user."}
+
+    # Check if the song exists in the global SongData table
+    in_table = supabase.table("SongData").select(count="exact").eq("title", title).eq("artist", artist).execute().count
+    if not in_table:
+        # Retrieve song data if it exists
+        lyrics = get_lyrics(artist, title)
+        
+        if lyrics is None:
+            return {"message": "No lyrics found for this song."}
+        
+        image_url = get_image_from_spotify(artist, title)
+
+        # Preparing for SQS send and getting Kanji
+        cleaned_lyrics = clean_lyrics(lyrics)
+        kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
+        all_kanji_data = get_all_kanji_data(kanji_list)
+
+        # Insert the song data into the global database only if it doesn't already exist
+        response = supabase.table("SongData").insert({
+            "title": title, 
+            "artist": artist, 
+            "lyrics": None, 
+            "hiragana_lyrics": None, 
+            "word_mapping": None, 
+            "kanji_data": all_kanji_data, 
+            "image_url": image_url
+        }).execute()
+        
+        # send to SQS
+        body = {
+            "song": title,
+            "artist": artist,
+            "cleaned_lyrics": cleaned_lyrics,
+            "access_token": access_token,
+            "refresh_token": refresh_token
+        }
+        sqs = aws_session.resource('sqs')
+        queue = sqs.Queue(sqs_url)
+        queue.send_message(
+            MessageBody=json.dumps(body)
+        )
+
+    # Song has been successfully added to the global database, now add for the specific user
+    response = supabase.table("Song").insert({"title": title, "artist": artist, "id": user.id}).execute()
+    print(response)
+    return response    
+    
    
 #need a route which takes in artist, song and, lyrics, processes the text, and adds the processed song to the database
 @router.post("/add-song-manual")
@@ -241,7 +311,7 @@ async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_us
     in_table = supabase.table("SongData").select(count="exact").eq("title", title).eq("artist", artist).execute().count
     if not in_table:
         # song not in global database
-        image_url = get_image(artist, title)
+        image_url = get_image_from_spotify(artist, title)
         cleaned_lyrics = clean_lyrics(lyrics)
         kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
         all_kanji_data = get_all_kanji_data(kanji_list)
