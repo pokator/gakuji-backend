@@ -50,6 +50,7 @@ conv = kakasi.getConverter()
 CONST_KANJI = r'[㐀-䶵一-鿋豈-頻]'
 HIRAGANA_FULL = r'[ぁ-ゟ]'
 KATAKANA_FULL = r'[゠-ヿ]'
+ALL_JAPANESE = f'{CONST_KANJI}|{HIRAGANA_FULL}|{KATAKANA_FULL}'
 
 aws_session = boto3.Session(
     aws_access_key_id=os.getenv("AWS_SERVER_PUBLIC_KEY"),
@@ -91,8 +92,10 @@ def get_lyrics(artist, title):
         #desperate times...
         other_source = genius.search_song(title, artist)
         lyrics = other_source.lyrics
+        
+    print(lyrics)
 
-    if CONST_KANJI in lyrics or HIRAGANA_FULL in lyrics or KATAKANA_FULL in lyrics:
+    if bool(re.search(ALL_JAPANESE, lyrics)):
         return lyrics
     else:
         return None
