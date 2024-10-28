@@ -81,7 +81,7 @@ def get_lyrics(artist, title):
     songs = genius_search.search(title)
     id = None
     for track in songs:
-        if track.artist.name == artist:
+        if artist in track.artist.name:
             id = track.id
             break
     lyrics = None
