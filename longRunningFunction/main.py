@@ -149,6 +149,7 @@ tagger = fugashi.Tagger()
 def split_into_lines(lyrics):
     # print("Splitting lyrics into lines.")
     lines = lyrics.strip().split('\n')
+    # print(lines)
     return lines
 
 def tokenize(lines):
@@ -157,13 +158,14 @@ def tokenize(lines):
     # to_hiragana_list = []
     # lyric_list = []
     for line in lines:
-        # print(f"Tokenizing line: {line}")
+        print(f"Tokenizing line: {line}")
         tagged_line = tagger(line)
         # lyric_line = [word.surface for word in tagged_line]
         # lyric_list.append(lyric_line)
         # to_hiragana_list.append(conv.do(line))
-        # for word in tagged_line:
-        #     print(word.surface, word.feature, word.pos, sep='\t')
+        for word in tagged_line:
+            # print(word.surface, word.feature, word.pos, sep='\t')
+            print(f"Tokenizing word: {word.surface}, Lemma: {word.feature.lemma}, POS1: {word.feature.pos1}")
         line_list.append(tagged_line)
     return line_list
 
@@ -244,6 +246,9 @@ def process_tokenized_lines(lines):
 
     for line in lines:
         new_line = []
+        
+        # for word in line:
+        #     print(f"Processing word: {word.surface}, Lemma: {word.feature.lemma}, POS1: {word.feature.pos1}")
 
         pos = 0
         while pos < len(line):
@@ -295,7 +300,7 @@ def process_tokenized_lines(lines):
                 while pos < len(line) and ((line[pos].surface in AUXILIARIES and line[pos].feature.pos1 == '助動詞') or line[pos].feature.pos1 == '接尾辞' or line[pos].surface in ['て', 'で', 'ん','ちゃ']):
                     # we have found a bound auxiliary. Need to reflect in main verb's definitions, furigana, and romaji
                     aux_word = line[pos]
-                    # print(aux_word.surface, aux_word.feature, aux_word.pos, sep='\t')
+                    # print("auxiliary", aux_word.surface, aux_word.feature, aux_word.pos, sep='\t')
                     final_word += aux_word.surface
                     aux_furigana = conv.do(aux_word.surface)
                     aux_romaji = kakasi.convert(aux_word.surface)[0]["hepburn"]
@@ -964,7 +969,11 @@ def lambda_handler(event, context):
 # """
 
 # cleaned_lyrics = """
-# 気持ちの整理がつかないの朝
+# 気持ちの整理がつかないままの朝に
+# 散らかったそれを鞄に詰め込んだ
+# やっぱり僕はあなたの前の僕は
+# 渡したい言葉なんて渡せないまま
+
 # """
 # lines = split_into_lines(cleaned_lyrics)
 # tokenized_lines = tokenize(lines)
@@ -973,10 +982,14 @@ def lambda_handler(event, context):
 # print(word_mapping)
 # print(lyrics)
 
+# 散らかったそれを鞄に詰め込んだ
+# やっぱり僕はあなたの前の僕は
+# 渡したい言葉なんて渡せないまま
 
 # # pipe to a file
-# with open("word_mapping.json", "w") as f:
-#     json.dump(word_mapping, f, indent=4)
+with open("word_mapping.json", "w") as f:
+    json.dump(word_mapping, f, indent=4)
+
 
 
 
