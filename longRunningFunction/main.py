@@ -987,8 +987,8 @@ def lambda_handler(event, context):
 # 渡したい言葉なんて渡せないまま
 
 # # pipe to a file
-with open("word_mapping.json", "w") as f:
-    json.dump(word_mapping, f, indent=4)
+# with open("word_mapping.json", "w") as f:
+#     json.dump(word_mapping, f, indent=4)
 
 
 
