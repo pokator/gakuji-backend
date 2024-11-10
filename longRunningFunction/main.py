@@ -961,15 +961,15 @@ def lambda_handler(event, context):
 # 傘を閉じて 濡れて帰ろうよ
 # """
 
-cleaned_lyrics = """
-ない
-"""
-lines = split_into_lines(cleaned_lyrics)
-tokenized_lines = tokenize(lines)
-word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
-hiragana_lines = convert_to_hiragana(lyrics)
-print(word_mapping)
-print(lyrics)
+# cleaned_lyrics = """
+# ない
+# """
+# lines = split_into_lines(cleaned_lyrics)
+# tokenized_lines = tokenize(lines)
+# word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
+# hiragana_lines = convert_to_hiragana(lyrics)
+# print(word_mapping)
+# print(lyrics)
 
 
 # # pipe to a file
