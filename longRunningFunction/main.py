@@ -265,7 +265,13 @@ def process_tokenized_lines(lines):
                     "romaji": "N/A",
                     "definitions": temp_properties
                 })
-                word_dict[word.surface] = temp_list
+                
+                full_word_data = {
+                    "root": None,
+                    "suffixes": None,
+                    "composite": temp_list
+                }
+                word_dict[word.surface] = full_word_data
                 new_line.append(word.surface)
                 pos += 1
                 continue
@@ -293,6 +299,11 @@ def process_tokenized_lines(lines):
                     info['romaji'] = kakasi.convert(word.surface)[0]["hepburn"]
                 
                 base_word_data = deepcopy(word_info)
+                base_furigana = conv.do(word.feature.lemma)
+                base_romaji = kakasi.convert(word.feature.lemma)[0]["hepburn"]
+                for info in base_word_data:
+                    info['furigana'] = base_furigana
+                    info['romaji'] = base_romaji
                 final_word = word.surface
                 pos += 1
                 suffix_data = []
