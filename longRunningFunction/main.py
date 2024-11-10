@@ -201,7 +201,9 @@ def get_word_info(word, type="word"):
         furigana = entry.kana_forms[0].text
         romaji = kakasi.convert(furigana)[0]["hepburn"]
         word_properties = []
-        for sense in entry.senses:
+        
+        # limit definitions to 3
+        for sense in entry.senses[:3]:
             pos = sense.pos
             definition = [sense_gloss.text for sense_gloss in sense.gloss]
             word_properties.append({
@@ -962,7 +964,7 @@ def lambda_handler(event, context):
 # """
 
 # cleaned_lyrics = """
-# ない
+# 気持ちの整理がつかないの朝
 # """
 # lines = split_into_lines(cleaned_lyrics)
 # tokenized_lines = tokenize(lines)
