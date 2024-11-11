@@ -390,8 +390,29 @@ def process_tokenized_lines(lines):
                         new_line.append(suffix.surface)
                 pos += 1
             elif word.feature.pos1 == '助詞':  # Particle detection
-                # print(word.surface, word.feature, word.pos, sep='\t')
+                if word.surface == 'は':
+                    temp_list = []
+                    temp_properties = {'pos': ["Particle"], 'definition': ['topic marker']}
+                    temp_list.append({
+                        "idseq": "none",
+                        "word": word.surface,
+                        "furigana": "は",
+                        "romaji": "ha",
+                        "definitions": temp_properties
+                    })
+                    
+                    full_word_data = {
+                        "root": None,
+                        "suffixes": None,
+                        "composite": temp_list
+                    }
+                    word_dict[word.surface] = full_word_data
+                    new_line.append(word.surface)
+                    pos += 1
+                    continue
+                # print("processing particle", word.surface, word.feature, word.pos, sep='\t')
                 word_info = get_word_info(word.surface, type="particle")
+                # print(word_info)
                 
                 if len(word_info) > 0:
                     full_word_data = {
@@ -978,7 +999,7 @@ def lambda_handler(event, context):
 # """
 
 cleaned_lyrics = """
-胸の奥がひりついてたまらなかった
+やっぱり僕はあなたの前の僕は
 """
 lines = split_into_lines(cleaned_lyrics)
 tokenized_lines = tokenize(lines)
