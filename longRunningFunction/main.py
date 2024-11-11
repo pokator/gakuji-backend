@@ -152,6 +152,9 @@ def split_into_lines(lyrics):
     # print(lines)
     return lines
 
+'''
+There is a race condition occurring in this code. I believe the tagger is not thread safe. However, the only way I know at the moment is to use the print.
+'''
 def tokenize(lines):
     # print("Tokenizing lyrics.")
     line_list = []
@@ -160,11 +163,7 @@ def tokenize(lines):
     for line in lines:
         print(f"Tokenizing line: {line}")
         tagged_line = tagger(line)
-        # lyric_line = [word.surface for word in tagged_line]
-        # lyric_list.append(lyric_line)
-        # to_hiragana_list.append(conv.do(line))
         for word in tagged_line:
-            # print(word.surface, word.feature, word.pos, sep='\t')
             print(f"Tokenizing word: {word.surface}, Lemma: {word.feature.lemma}, POS1: {word.feature.pos1}")
         line_list.append(tagged_line)
     return line_list
@@ -220,6 +219,7 @@ def get_word_info(word, type="word"):
             "romaji": romaji,
             "definitions": word_properties
         }
+        
         if(common):
             word_info.insert(0, entry_result)
         else:
@@ -278,19 +278,18 @@ def process_tokenized_lines(lines):
             
             if word.surface in word_dict:
                 #efficiency modification - most songs will repeat words, why look them up again
-                # print(f"Word already processed: {word.surface}")
                 new_line.append(word.surface)
                 pos += 1
                 continue
 
-            # print(f"Processing word: {word.surface}, Lemma: {word.feature.lemma}, POS1: {word.feature.pos1}")
+            print(f"Processing word: {word.surface}, Lemma: {word.feature.lemma}, POS1: {word.feature.pos1}")
             
             # Verbs, adjectives, adjectival nouns.
             if (word.feature.pos1 == '動詞' 
                 or word.feature.pos1 == '形容詞' 
                 or (word.feature.pos1 == '名詞' and word.feature.pos3 == '形状詞可能')
                 or word.feature.pos1 == '形状詞'
-                or word.feature.pos1 == '形容詞'):
+                or word.feature.pos1 == '形容詞' or word.feature.pos1 == '助動詞'):
                 
                 #retrieve definition from dictionary.
                 word_info = get_word_info(word.feature.lemma)
@@ -311,7 +310,6 @@ def process_tokenized_lines(lines):
                 while pos < len(line) and ((line[pos].surface in AUXILIARIES and line[pos].feature.pos1 == '助動詞') or line[pos].feature.pos1 == '接尾辞' or line[pos].surface in ['て', 'で', 'ん','ちゃ']):
                     # we have found a bound auxiliary. Need to reflect in main verb's definitions, furigana, and romaji
                     aux_word = line[pos]
-                    # print("auxiliary", aux_word.surface, aux_word.feature, aux_word.pos, sep='\t')
                     final_word += aux_word.surface
                     aux_furigana = conv.do(aux_word.surface)
                     aux_romaji = kakasi.convert(aux_word.surface)[0]["hepburn"]
@@ -979,19 +977,15 @@ def lambda_handler(event, context):
 # 傘を閉じて 濡れて帰ろうよ
 # """
 
-# cleaned_lyrics = """
-# 気持ちの整理がつかないままの朝に
-# 散らかったそれを鞄に詰め込んだ
-# やっぱり僕はあなたの前の僕は
-# 渡したい言葉なんて渡せないまま
-
-# """
-# lines = split_into_lines(cleaned_lyrics)
-# tokenized_lines = tokenize(lines)
-# word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
-# hiragana_lines = convert_to_hiragana(lyrics)
-# print(word_mapping)
-# print(lyrics)
+cleaned_lyrics = """
+胸の奥がひりついてたまらなかった
+"""
+lines = split_into_lines(cleaned_lyrics)
+tokenized_lines = tokenize(lines)
+word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
+hiragana_lines = convert_to_hiragana(lyrics)
+print(word_mapping)
+print(lyrics)
 
 # 散らかったそれを鞄に詰め込んだ
 # やっぱり僕はあなたの前の僕は
