@@ -697,21 +697,21 @@ def lambda_handler(event, context):
 # 傘を閉じて 濡れて帰ろうよ
 # """
 
-cleaned_lyrics = """
-もう悲しくない人は慣れない生き物だから
-"""
-lines = split_into_lines(cleaned_lyrics)
-checked_lines = dakuten_check(lines)
-tokenized_lines = tokenize(checked_lines)
-word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
-hiragana_lines = convert_to_hiragana(lyrics)
-print(word_mapping)
-print(lyrics)
+# cleaned_lyrics = """
+# もう悲しくない人は慣れない生き物だから
+# """
+# lines = split_into_lines(cleaned_lyrics)
+# checked_lines = dakuten_check(lines)
+# tokenized_lines = tokenize(checked_lines)
+# word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
+# hiragana_lines = convert_to_hiragana(lyrics)
+# print(word_mapping)
+# print(lyrics)
 
 # 散らかったそれを鞄に詰め込んだ
 # やっぱり僕はあなたの前の僕は
 # 渡したい言葉なんて渡せないまま
 
 # pipe to a file
-with open("word_mapping.json", "w") as f:
-    json.dump(word_mapping, f, indent=4)
+# with open("word_mapping.json", "w") as f:
+#     json.dump(word_mapping, f, indent=4)
