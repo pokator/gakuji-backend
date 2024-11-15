@@ -128,6 +128,25 @@ SUFFIX_DICT = {
     "式": "suffix meaning 'style' or 'system', used in nouns to denote a particular method or system",
 }
 
+# Mapping of basic hiragana/katakana to their dakuten and handakuten equivalents
+DAKUTEN_MAP = {
+    # Dakuten cases (濁点)
+    'か': 'が', 'き': 'ぎ', 'く': 'ぐ', 'け': 'げ', 'こ': 'ご',
+    'さ': 'ざ', 'し': 'じ', 'す': 'ず', 'せ': 'ぜ', 'そ': 'ぞ',
+    'た': 'だ', 'ち': 'ぢ', 'つ': 'づ', 'て': 'で', 'と': 'ど',
+    'は': 'ば', 'ひ': 'び', 'ふ': 'ぶ', 'へ': 'べ', 'ほ': 'ぼ',
+    'ハ': 'バ', 'ヒ': 'ビ', 'フ': 'ブ', 'ヘ': 'ベ', 'ホ': 'ボ',
+    'カ': 'ガ', 'キ': 'ギ', 'ク': 'グ', 'ケ': 'ゲ', 'コ': 'ゴ',
+    'サ': 'ザ', 'シ': 'ジ', 'ス': 'ズ', 'セ': 'ゼ', 'ソ': 'ゾ',
+    'タ': 'ダ', 'チ': 'ヂ', 'ツ': 'ヅ', 'テ': 'デ', 'ト': 'ド',
+}
+
+HANDAKUTEN_MAP = {
+    # Handakuten cases (半濁点)
+    'は': 'ぱ', 'ひ': 'ぴ', 'ふ': 'ぷ', 'へ': 'ぺ', 'ほ': 'ぽ',
+    'ハ': 'パ', 'ヒ': 'ピ', 'フ': 'プ', 'ヘ': 'ペ', 'ホ': 'ポ'
+}
+
 load_dotenv()
 
 api_url: str = os.getenv("SUPABASE_URL")
@@ -151,6 +170,73 @@ def split_into_lines(lyrics):
     lines = lyrics.strip().split('\n')
     # print(lines)
     return lines
+
+# sometimes, the lyrics use the wrong characters for a dakuten'd character. This function checks for that and corrects it.
+def dakuten_check(lines):
+    result = []
+    for line in lines:
+        new_line = process_dakuten_handakuten(line)
+        result.append(new_line)
+    return result
+
+def process_dakuten_handakuten(text: str) -> str:
+    """
+    Process a string to handle standalone dakuten (゛) and handakuten (゜) marks
+    by combining them with the previous character if possible.
+    
+    Args:
+        text: Input string that may contain standalone dakuten/handakuten marks
+        
+    Returns:
+        Processed string with proper dakuten/handakuten combinations
+    """
+    result = []
+    chars = list(text)
+    i = 0
+    
+    while i < len(chars):
+        if i < len(chars) - 1:
+            current_char = chars[i]
+            next_char = chars[i + 1]
+            
+            if next_char == '\u3099':  # Dakuten mark
+                if current_char in DAKUTEN_MAP:
+                    result.append(DAKUTEN_MAP[current_char])
+                    i += 2
+                else:
+                    result.append(current_char)
+                    result.append(next_char)
+                    i += 2
+            elif next_char == '\u309A':  # Handakuten mark
+                if current_char in HANDAKUTEN_MAP:
+                    result.append(HANDAKUTEN_MAP[current_char])
+                    i += 2
+                else:
+                    result.append(current_char)
+                    result.append(next_char)
+                    i += 2
+            else:
+                result.append(current_char)
+                i += 1
+        else:
+            result.append(chars[i])
+            i += 1
+            
+    return ''.join(result)
+
+def has_standalone_diacritics(text: str) -> bool:
+    """
+    Check if a string contains any standalone dakuten or handakuten marks.
+    
+    Args:
+        text: Input string to check
+        
+    Returns:
+        True if standalone dakuten or handakuten is found, False otherwise
+    """
+    return '\u3099' in text or '\u309A' in text
+    
+
 
 '''
 There is a race condition occurring in this code. I believe the tagger is not thread safe. However, the only way I know at the moment is to use the print.
@@ -410,9 +496,7 @@ def process_tokenized_lines(lines):
                     new_line.append(word.surface)
                     pos += 1
                     continue
-                # print("processing particle", word.surface, word.feature, word.pos, sep='\t')
                 word_info = get_word_info(word.surface, type="particle")
-                # print(word_info)
                 
                 if len(word_info) > 0:
                     full_word_data = {
@@ -899,7 +983,8 @@ def lambda_handler(event, context):
             refresh_token = body['refresh_token']
 
             lines = split_into_lines(cleaned_lyrics)
-            tokenized_lines = tokenize(lines)
+            checked_lines = dakuten_check(lines)
+            tokenized_lines = tokenize(checked_lines)
             word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
             hiragana_lines = convert_to_hiragana(lyrics)
 
@@ -999,10 +1084,17 @@ def lambda_handler(event, context):
 # """
 
 cleaned_lyrics = """
-やっぱり僕はあなたの前の僕は
+[こっちのけんと「はいよろこんで」歌詞]
+
+[Intro]
+『はい喜んで』
+『あなた方のため』
+『はい謹んで』
+『あなた方のため(Hey)に(Hey)』
 """
 lines = split_into_lines(cleaned_lyrics)
-tokenized_lines = tokenize(lines)
+checked_lines = dakuten_check(lines)
+tokenized_lines = tokenize(checked_lines)
 word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
 hiragana_lines = convert_to_hiragana(lyrics)
 print(word_mapping)
