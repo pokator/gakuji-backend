@@ -203,6 +203,8 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
         # Preparing for SQS send and getting Kanji
         cleaned_lyrics = clean_lyrics(lyrics)
         kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
+        if not kanji_list:
+            return {"message": "Error! Seems like we can't get the lyrics from the link. Try searching for the song manually."}
         all_kanji_data = get_all_kanji_data(kanji_list)
 
         # Insert the song data into the global database only if it doesn't already exist
@@ -263,6 +265,8 @@ async def add_song_search(searchItem: SearchAdd = None, user: User = Depends(get
         # Preparing for SQS send and getting Kanji
         cleaned_lyrics = clean_lyrics(lyrics)
         kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
+        if not kanji_list:
+            return {"message": "Error! Seems like we can't get the lyrics from the link. Paste the lyrics in."}
         all_kanji_data = get_all_kanji_data(kanji_list)
 
         # Insert the song data into the global database only if it doesn't already exist
@@ -293,7 +297,8 @@ async def add_song_search(searchItem: SearchAdd = None, user: User = Depends(get
     # Song has been successfully added to the global database, now add for the specific user
     response = supabase.table("Song").insert({"title": title, "artist": artist, "id": user.id}).execute()
     print(response)
-    return response    
+    return {"message": "Song added successfully.", "status": "success"}
+  
     
    
 #need a route which takes in artist, song and, lyrics, processes the text, and adds the processed song to the database
