@@ -199,7 +199,7 @@ def process_dakuten_handakuten(text: str) -> str:
             current_char = chars[i]
             next_char = chars[i + 1]
             
-            if next_char == '\u3099':  # Dakuten mark
+            if next_char == '゙':  # Dakuten mark
                 if current_char in DAKUTEN_MAP:
                     result.append(DAKUTEN_MAP[current_char])
                     i += 2
@@ -207,7 +207,7 @@ def process_dakuten_handakuten(text: str) -> str:
                     result.append(current_char)
                     result.append(next_char)
                     i += 2
-            elif next_char == '\u309A':  # Handakuten mark
+            elif next_char == '゚':  # Handakuten mark
                 if current_char in HANDAKUTEN_MAP:
                     result.append(HANDAKUTEN_MAP[current_char])
                     i += 2
@@ -234,7 +234,7 @@ def has_standalone_diacritics(text: str) -> bool:
     Returns:
         True if standalone dakuten or handakuten is found, False otherwise
     """
-    return '\u3099' in text or '\u309A' in text
+    return '゙' in text or '゚' in text
     
 
 
@@ -244,8 +244,6 @@ There is a race condition occurring in this code. I believe the tagger is not th
 def tokenize(lines):
     # print("Tokenizing lyrics.")
     line_list = []
-    # to_hiragana_list = []
-    # lyric_list = []
     for line in lines:
         print(f"Tokenizing line: {line}")
         tagged_line = tagger(line)
@@ -263,8 +261,6 @@ TODO: Make considerations on JISHO API (maybe query it when JMDict fails)
 TODO: Make an edge case dictionary (for words that get incorrectly tokenized)
 '''
 def get_word_info(word, type="word"):
-    # print(f"Looking up word: {word}")
-    
     try:
         result = jam.lookup(word)
     except Exception as e:
@@ -316,7 +312,7 @@ def get_word_info(word, type="word"):
 
 def is_japanese(text):
     # Regex to match Hiragana, Katakana, Kanji, and Japanese punctuation
-    return re.match(r'[\u3040-\u30FF\u4E00-\u9FFF\uFF00-\uFFEF]', text)
+    return re.match(r'[぀-ヿ一-鿿＀-￯]', text)
 
 '''
 This function handles the processing of the lyrics once they are tokenized. There's a lot of edge
@@ -333,9 +329,6 @@ def process_tokenized_lines(lines):
     for line in lines:
         new_line = []
         
-        # for word in line:
-        #     print(f"Processing word: {word.surface}, Lemma: {word.feature.lemma}, POS1: {word.feature.pos1}")
-
         pos = 0
         while pos < len(line):
             word = line[pos]
@@ -377,18 +370,26 @@ def process_tokenized_lines(lines):
                 or word.feature.pos1 == '形状詞'
                 or word.feature.pos1 == '形容詞' or word.feature.pos1 == '助動詞'):
                 
+                
                 #retrieve definition from dictionary.
                 word_info = get_word_info(word.feature.lemma)
                 for info in word_info:
                     info['furigana'] = conv.do(word.surface)
-                    info['romaji'] = kakasi.convert(word.surface)[0]["hepburn"]
+                    info['romaji'] = kakasi.convert(info['furigana'])[0]["hepburn"]
                 
                 base_word_data = deepcopy(word_info)
+                
                 base_furigana = conv.do(word.feature.lemma)
-                base_romaji = kakasi.convert(word.feature.lemma)[0]["hepburn"]
+                base_romaji = kakasi.convert(base_furigana)[0]["hepburn"]
+                
                 for info in base_word_data:
+                    info['word'] = word.feature.lemma
                     info['furigana'] = base_furigana
                     info['romaji'] = base_romaji
+                    
+                for info in word_info:
+                    info['word'] = word.surface
+                    
                 final_word = word.surface
                 pos += 1
                 suffix_data = []
@@ -402,6 +403,7 @@ def process_tokenized_lines(lines):
                     for info in word_info:
                         info['furigana'] += aux_furigana
                         info['romaji'] += aux_romaji
+                        info['word'] += aux_word.surface
                     aux_lemma = aux_word.feature.lemma
                     aux_meaning = AUXILIARIES.get(aux_lemma)
                     if aux_meaning:
@@ -553,394 +555,6 @@ def process_tokenized_lines(lines):
         lyrics.append(new_line)
     return word_dict, lyrics
 
-# def process_tokenized_lines(lines):
-#     word_dict = {}
-#     lyrics = []
-    
-#     # Cache for processed combinations to improve efficiency
-#     combination_cache = {}
-
-#     for line in lines:
-#         new_line = []
-#         pos = 0
-        
-#         while pos < len(line):
-#             word = line[pos]
-            
-#             # Fast path for non-Japanese and cached words
-#             if not is_japanese(word.surface):
-#                 if word.surface not in word_dict:
-#                     word_dict[word.surface] = {
-#                         "root": {
-#                             "idseq": "none",
-#                             "word": word.surface,
-#                             "furigana": "N/A",
-#                             "lemma": "N/A",
-#                             "romaji": "N/A",
-#                             "definitions": {'pos': ["Not Applicable"], 'definition': ['not found']}
-#                         },
-#                         "suffixes": []
-#                     }
-#                 new_line.append(word.surface)
-#                 pos += 1
-#                 continue
-            
-#             if word.surface in word_dict:
-#                 new_line.append(word.surface)
-#                 pos += 1
-#                 continue
-
-#             # Process verbs, adjectives, and adjectival nouns
-#             if (word.feature.pos1 in ['動詞', '形容詞'] or 
-#                 (word.feature.pos1 == '名詞' and word.feature.pos3 == '形状詞可能') or
-#                 word.feature.pos1 in ['形状詞', '形容詞']):
-                
-#                 # Get root word information
-#                 word_info = get_word_info(word.feature.lemma)
-#                 root_info = {
-#                     "idseq": word_info[0]["idseq"] if word_info else "none",
-#                     "word": word.surface,
-#                     "lemma": word.feature.lemma,
-#                     "furigana": conv.do(word.surface),
-#                     "romaji": kakasi.convert(word.surface)[0]["hepburn"],
-#                     "definitions": word_info[0]["definitions"] if word_info else {'pos': [word.pos], 'definition': ['not found']}
-#                 }
-                
-#                 suffixes = []
-#                 final_word = word.surface
-#                 pos += 1
-                
-#                 # Process auxiliaries and suffixes
-#                 while pos < len(line):
-#                     next_token = line[pos]
-#                     if not (
-#                         (next_token.surface in AUXILIARIES and next_token.feature.pos1 == '助動詞') or 
-#                         next_token.feature.pos1 == '接尾辞' or 
-#                         next_token.surface in ['て', 'で', 'ん', 'ちゃ']
-#                     ):
-#                         break
-                        
-#                     suffix_info = {
-#                         "type": next_token.feature.pos1,
-#                         "surface": next_token.surface,
-#                         "lemma": next_token.feature.lemma,
-#                         "furigana": conv.do(next_token.surface),
-#                         "romaji": kakasi.convert(next_token.surface)[0]["hepburn"]
-#                     }
-                    
-#                     # Add auxiliary meaning if available
-#                     if next_token.surface in AUXILIARIES:
-#                         suffix_info["meaning"] = AUXILIARIES[next_token.surface]
-                    
-#                     suffixes.append(suffix_info)
-#                     final_word += next_token.surface
-#                     pos += 1
-                
-#                 word_dict[final_word] = {
-#                     "root": root_info,
-#                     "suffixes": suffixes
-#                 }
-#                 new_line.append(final_word)
-                
-#             # Handle suffixes
-#             elif word.feature.pos1 == '接尾辞':
-#                 prev_word = line[pos - 1].surface
-#                 combined = prev_word + word.surface
-                
-#                 # Use cached result if available
-#                 if combined in combination_cache:
-#                     word_dict[combined] = combination_cache[combined]
-#                     new_line.pop()
-#                     new_line.append(combined)
-#                 else:
-#                     word_info = get_word_info(combined)
-#                     if word_info:
-#                         result = {
-#                             "root": {
-#                                 "word": prev_word,
-#                                 "furigana": conv.do(prev_word),
-#                                 "romaji": kakasi.convert(prev_word)[0]["hepburn"]
-#                             },
-#                             "suffixes": [{
-#                                 "surface": word.surface,
-#                                 "furigana": conv.do(word.surface),
-#                                 "romaji": kakasi.convert(word.surface)[0]["hepburn"],
-#                                 "type": "接尾辞"
-#                             }]
-#                         }
-#                         combination_cache[combined] = result
-#                         word_dict[combined] = result
-#                         new_line.pop()
-#                         new_line.append(combined)
-#                     else:
-#                         # Handle standalone suffix
-#                         suffix_info = get_word_info(word.surface) or [{
-#                             "idseq": "none",
-#                             "word": word.surface,
-#                             "furigana": conv.do(word.surface),
-#                             "romaji": kakasi.convert(word.surface)[0]["hepburn"],
-#                             "definitions": {'pos': ["Suffix"], 'definition': [SUFFIX_DICT.get(word.surface, 'not found')]}
-#                         }]
-#                         word_dict[word.surface] = {
-#                             "root": suffix_info[0],
-#                             "suffixes": []
-#                         }
-#                         new_line.append(word.surface)
-#                 pos += 1
-                
-#             # Handle particles and other parts of speech
-#             else:
-#                 lookup_surface = word.surface
-#                 lookup_lemma = word.feature.lemma
-                
-#                 # Try surface form first, then lemma
-#                 word_info = get_word_info(lookup_surface) or get_word_info(lookup_lemma)
-                
-#                 if word_info:
-#                     word_dict[word.surface] = {
-#                         "root": {
-#                             "idseq": word_info[0]["idseq"],
-#                             "word": word.surface,
-#                             "furigana": conv.do(word.surface),
-#                             "romaji": kakasi.convert(word.surface)[0]["hepburn"],
-#                             "definitions": word_info[0]["definitions"]
-#                         },
-#                         "suffixes": []
-#                     }
-#                 else:
-#                     word_dict[word.surface] = {
-#                         "root": {
-#                             "idseq": "none",
-#                             "word": word.surface,
-#                             "furigana": conv.do(word.surface),
-#                             "romaji": kakasi.convert(word.surface)[0]["hepburn"],
-#                             "definitions": {'pos': [word.pos], 'definition': ['not found']}
-#                         },
-#                         "suffixes": []
-#                     }
-#                 new_line.append(word.surface)
-#                 pos += 1
-
-#         lyrics.append(new_line)
-    
-#     return word_dict, lyrics
-
-# def process_tokenized_lines(lines):
-#     word_dict = {}
-#     lyrics = []
-#     combination_cache = {}
-
-#     for line in lines:
-#         new_line = []
-#         pos = 0
-        
-#         while pos < len(line):
-#             word = line[pos]
-            
-#             # Fast path for non-Japanese and cached words
-#             if not is_japanese(word.surface):
-#                 if word.surface not in word_dict:
-#                     word_dict[word.surface] = {
-#                         "root": {
-#                             "idseq": "none",
-#                             "word": word.surface,
-#                             "furigana": "N/A",
-#                             "lemma": "N/A",
-#                             "romaji": "N/A",
-#                             "definitions": [{'pos': ["Not Applicable"], 'definition': ['not found']}]  # Changed to list
-#                         },
-#                         "suffixes": [],
-#                         "combination": None
-#                     }
-#                 new_line.append(word.surface)
-#                 pos += 1
-#                 continue
-            
-#             if word.surface in word_dict:
-#                 new_line.append(word.surface)
-#                 pos += 1
-#                 continue
-
-#             # Process verbs, adjectives, and adjectival nouns
-#             if (word.feature.pos1 in ['動詞', '形容詞'] or 
-#                 (word.feature.pos1 == '名詞' and word.feature.pos3 == '形状詞可能') or
-#                 word.feature.pos1 in ['形状詞', '形容詞']):
-                
-#                 # Get root word information
-#                 word_info = get_word_info(word.feature.lemma)
-#                 root_info = {
-#                     "idseq": word_info[0]["idseq"] if word_info else "none",
-#                     "word": word.surface,
-#                     "lemma": word.feature.lemma,
-#                     "furigana": conv.do(word.surface),
-#                     "romaji": kakasi.convert(word.surface)[0]["hepburn"],
-#                     "definitions": word_info[0]["definitions"] if word_info else [{'pos': [word.pos], 'definition': ['not found']}]
-#                 }
-                
-#                 suffixes = []
-#                 final_word = word.surface
-#                 final_furigana = root_info["furigana"]
-#                 final_romaji = root_info["romaji"]
-#                 combined_definitions = root_info["definitions"].copy()  # Create a copy of the list
-#                 pos += 1
-                
-#                 # Process auxiliaries and suffixes
-#                 aux_meanings = []  # Collect auxiliary meanings
-#                 while pos < len(line):
-#                     next_token = line[pos]
-#                     if not (
-#                         (next_token.surface in AUXILIARIES and next_token.feature.pos1 == '助動詞') or 
-#                         next_token.feature.pos1 == '接尾辞' or 
-#                         next_token.surface in ['て', 'で', 'ん', 'ちゃ']
-#                     ):
-#                         print("breaking")
-#                         break
-                        
-#                     suffix_info = {
-#                         "type": next_token.feature.pos1,
-#                         "surface": next_token.surface,
-#                         "lemma": next_token.feature.lemma,
-#                         "furigana": conv.do(next_token.surface),
-#                         "romaji": kakasi.convert(next_token.surface)[0]["hepburn"]
-#                     }
-                    
-#                     # Add auxiliary meaning if available
-#                     if next_token.surface in AUXILIARIES:
-#                         aux_meaning = AUXILIARIES[next_token.surface]
-#                         suffix_info["meaning"] = aux_meaning
-#                         aux_meanings.append(aux_meaning)
-#                     elif next_token.word.lemma in AUXILIARIES:
-#                         aux_meaning = AUXILIARIES[next_token.word.lemma]
-#                         suffix_info["meaning"] = aux_meaning
-#                         aux_meanings.append(aux_meaning)
-                    
-#                     suffixes.append(suffix_info)
-#                     final_word += next_token.surface
-#                     final_furigana += suffix_info["furigana"]
-#                     final_romaji += suffix_info["romaji"]
-#                     pos += 1
-                
-#                 # Modify definitions if we have auxiliary meanings
-#                 if aux_meanings:
-#                     combined_definitions = modify_definitions(combined_definitions, aux_meanings)
-                
-#                 # Create combined form if there are suffixes
-#                 combination = {
-#                     "idseq": root_info["idseq"],
-#                     "word": final_word,
-#                     "furigana": final_furigana,
-#                     "romaji": final_romaji,
-#                     "definitions": combined_definitions
-#                 } if suffixes else None
-                
-#                 word_dict[final_word] = {
-#                     "root": root_info,
-#                     "suffixes": suffixes,
-#                     "combination": combination
-#                 }
-#                 new_line.append(final_word)
-                
-#             # Handle suffixes
-#             elif word.feature.pos1 == '接尾辞':
-#                 prev_word = line[pos - 1].surface
-#                 combined = prev_word + word.surface
-                
-#                 # Use cached result if available
-#                 if combined in combination_cache:
-#                     word_dict[combined] = combination_cache[combined]
-#                     new_line.pop()
-#                     new_line.append(combined)
-#                 else:
-#                     word_info = get_word_info(combined)
-#                     if word_info:
-#                         root_part = {
-#                             "word": prev_word,
-#                             "furigana": conv.do(prev_word),
-#                             "romaji": kakasi.convert(prev_word)[0]["hepburn"]
-#                         }
-                        
-#                         suffix_part = {
-#                             "surface": word.surface,
-#                             "furigana": conv.do(word.surface),
-#                             "romaji": kakasi.convert(word.surface)[0]["hepburn"],
-#                             "type": "接尾辞"
-#                         }
-                        
-#                         combination = {
-#                             "idseq": word_info[0]["idseq"],
-#                             "word": combined,
-#                             "furigana": root_part["furigana"] + suffix_part["furigana"],
-#                             "romaji": root_part["romaji"] + suffix_part["romaji"],
-#                             "definitions": word_info[0]["definitions"]
-#                         }
-                        
-#                         result = {
-#                             "root": root_part,
-#                             "suffixes": [suffix_part],
-#                             "combination": combination
-#                         }
-                        
-#                         combination_cache[combined] = result
-#                         word_dict[combined] = result
-#                         new_line.pop()
-#                         new_line.append(combined)
-#                     else:
-#                         # Handle standalone suffix
-#                         suffix_info = get_word_info(word.surface) or [{
-#                             "idseq": "none",
-#                             "word": word.surface,
-#                             "furigana": conv.do(word.surface),
-#                             "romaji": kakasi.convert(word.surface)[0]["hepburn"],
-#                             "definitions": [{'pos': ["Suffix"], 'definition': [SUFFIX_DICT.get(word.surface, 'not found')]}]  # Changed to list
-#                         }]
-#                         word_dict[word.surface] = {
-#                             "root": suffix_info[0],
-#                             "suffixes": [],
-#                             "combination": None
-#                         }
-#                         new_line.append(word.surface)
-#                 pos += 1
-                
-#             # Handle particles and other parts of speech
-#             else:
-#                 lookup_surface = word.surface
-#                 lookup_lemma = word.feature.lemma
-                
-#                 # Try surface form first, then lemma
-#                 word_info = get_word_info(lookup_surface) or get_word_info(lookup_lemma)
-                
-#                 if word_info:
-#                     word_dict[word.surface] = {
-#                         "root": {
-#                             "idseq": word_info[0]["idseq"],
-#                             "word": word.surface,
-#                             "furigana": conv.do(word.surface),
-#                             "romaji": kakasi.convert(word.surface)[0]["hepburn"],
-#                             "definitions": word_info[0]["definitions"]
-#                         },
-#                         "suffixes": [],
-#                         "combination": None
-#                     }
-#                 else:
-#                     word_dict[word.surface] = {
-#                         "root": {
-#                             "idseq": "none",
-#                             "word": word.surface,
-#                             "furigana": conv.do(word.surface),
-#                             "romaji": kakasi.convert(word.surface)[0]["hepburn"],
-#                             "definitions": [{'pos': [word.pos], 'definition': ['not found']}]  # Changed to list
-#                         },
-#                         "suffixes": [],
-#                         "combination": None
-#                     }
-#                 new_line.append(word.surface)
-#                 pos += 1
-
-#         lyrics.append(new_line)
-    
-#     return word_dict, lyrics
-
-
 # Modify definitions to include auxiliary meanings
 def modify_definitions(definitions_list, aux_meanings):
     if aux_meanings:
@@ -1084,105 +698,20 @@ def lambda_handler(event, context):
 # """
 
 cleaned_lyrics = """
-# [こっちのけんと「はいよろこんで」歌詞]
-
-# [Intro]
-# 『はい喜んで』
-# 『あなた方のため』
-# 『はい謹んで』
-# 『あなた方のため(Hey)に(Hey)』
-# """
-# lines = split_into_lines(cleaned_lyrics)
-# checked_lines = dakuten_check(lines)
-# tokenized_lines = tokenize(checked_lines)
-# word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
-# hiragana_lines = convert_to_hiragana(lyrics)
-# print(word_mapping)
-# print(lyrics)
+もう悲しくない人は慣れない生き物だから
+"""
+lines = split_into_lines(cleaned_lyrics)
+checked_lines = dakuten_check(lines)
+tokenized_lines = tokenize(checked_lines)
+word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
+hiragana_lines = convert_to_hiragana(lyrics)
+print(word_mapping)
+print(lyrics)
 
 # 散らかったそれを鞄に詰め込んだ
 # やっぱり僕はあなたの前の僕は
 # 渡したい言葉なんて渡せないまま
 
-# # pipe to a file
-# with open("word_mapping.json", "w") as f:
-#     json.dump(word_mapping, f, indent=4)
-
-
-
-
-# previously generated by ChatGPT (incorrectly)
-
-        # combined_word = ""
-        # combined_furigana = ""
-        # combined_romaji = ""
-        # combined_word_info = []
-        # aux_meanings = []
-                # If there's an unfinished verb+auxiliary sequence, store it
-                # if combined_word:
-                #     word_dict[combined_word] = {
-                #         "idseq": combined_word_info[0]['idseq'],
-                #         "word": combined_word,
-                #         "furigana": conv.do(combined_furigana),
-                #         "romaji": kakasi.convert(combined_furigana)[0]["hepburn"],
-                #         "definitions": modify_definitions(combined_word_info[0]['definitions'], aux_meanings)
-                #     }
-
-                # Reset combined data for the new verb
-                # combined_word = word.surface
-                # combined_furigana = word.feature.kana
-                # combined_romaji = word.feature.pronBase
-                # combined_word_info = word_info
-                # aux_meanings = []
-
-                # elif word.feature.pos1 == '助動詞':  # Auxiliary verb detection
-                #     # Combine auxiliary verb with main verb
-                #     combined_word += word.surface
-                #     combined_furigana += word.feature.kana
-                #     combined_romaji += word.feature.pronBase
-
-                #     # Get auxiliary lemma and check for its meaning
-                #     aux_lemma = word.feature.lemma
-                #     aux_meaning = AUXILIARIES.get(aux_lemma)
-                #     if aux_meaning:
-                #         aux_meanings.append(aux_meaning)
-
-
-
-                # word_info = get_word_info(word.surface)
-                # # Store the current combined word before switching to the next word
-                # if combined_word:
-                #     word_dict[combined_word] = {
-                #         "idseq": combined_word_info[0]['idseq'],
-                #         "word": combined_word,
-                #         "furigana": conv.do(combined_furigana),
-                #         "romaji": kakasi.convert(combined_furigana)[0]["hepburn"],
-                #         "definitions": modify_definitions(combined_word_info[0]['definitions'], aux_meanings)
-                #     }
-
-                # # Add the current word (non-verb) to the dictionary
-                # if len(word_info) > 0:
-                #     word_dict[word.surface] = {
-                #         "idseq": word_info[0]['idseq'],
-                #         "word": word_info[0]['word'],
-                #         "furigana": word_info[0]['furigana'],
-                #         "romaji": word_info[0]['romaji'],
-                #         "definitions": word_info[0]['definitions']
-                #     }
-
-                # # Reset combined variables for future use
-                # combined_word = ""
-                # combined_furigana = ""
-                # combined_romaji = ""
-                # aux_meanings = []
-                
-                
-        # Store any remaining combined word+auxiliary sequence after processing the line
-        # if combined_word:
-        #     word_dict[combined_word] = {
-        #         "idseq": combined_word_info[0]['idseq'],
-        #         "word": combined_word,
-        #         "furigana": conv.do(combined_furigana),
-        #         "romaji": kakasi.convert(combined_furigana)[0]["hepburn"],
-        #         "definitions": modify_definitions(combined_word_info[0]['definitions'], aux_meanings)
-        #     }
+# pipe to a file
+with open("word_mapping.json", "w") as f:
+    json.dump(word_mapping, f, indent=4)
