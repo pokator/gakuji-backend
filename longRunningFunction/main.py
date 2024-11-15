@@ -1084,21 +1084,21 @@ def lambda_handler(event, context):
 # """
 
 cleaned_lyrics = """
-[こっちのけんと「はいよろこんで」歌詞]
+# [こっちのけんと「はいよろこんで」歌詞]
 
-[Intro]
-『はい喜んで』
-『あなた方のため』
-『はい謹んで』
-『あなた方のため(Hey)に(Hey)』
-"""
-lines = split_into_lines(cleaned_lyrics)
-checked_lines = dakuten_check(lines)
-tokenized_lines = tokenize(checked_lines)
-word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
-hiragana_lines = convert_to_hiragana(lyrics)
-print(word_mapping)
-print(lyrics)
+# [Intro]
+# 『はい喜んで』
+# 『あなた方のため』
+# 『はい謹んで』
+# 『あなた方のため(Hey)に(Hey)』
+# """
+# lines = split_into_lines(cleaned_lyrics)
+# checked_lines = dakuten_check(lines)
+# tokenized_lines = tokenize(checked_lines)
+# word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
+# hiragana_lines = convert_to_hiragana(lyrics)
+# print(word_mapping)
+# print(lyrics)
 
 # 散らかったそれを鞄に詰め込んだ
 # やっぱり僕はあなたの前の僕は
