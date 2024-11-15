@@ -94,11 +94,8 @@ def get_lyrics(artist, title):
         lyrics = other_source.lyrics
         
     print(lyrics)
-
-    if bool(re.search(ALL_JAPANESE, lyrics)):
-        return lyrics
-    else:
-        return None
+    return lyrics
+    
 
 def delete_before_line_break(s):
     index = s.find('\n')  # Find the position of the first line break
@@ -115,7 +112,10 @@ def clean_lyrics(lyrics):
     # Remove "number followed by Embed"
     lyrics = re.sub(r'\d+Embed', '', lyrics)
     lyrics = re.sub(r'Embed', '', lyrics)
-    return lyrics
+    if bool(re.search(ALL_JAPANESE, lyrics)):
+        return lyrics
+    else:
+        return None
 
 
 #specifically used to return the list of kanji in the lyrics
@@ -202,6 +202,8 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
 
         # Preparing for SQS send and getting Kanji
         cleaned_lyrics = clean_lyrics(lyrics)
+        if cleaned_lyrics is None:
+            return {"message": "No Japanese lyrics found for this song. Try searching for the song manually."}
         kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
         if not kanji_list:
             return {"message": "Error! Seems like we can't get the lyrics from the link. Try searching for the song manually."}
@@ -264,9 +266,11 @@ async def add_song_search(searchItem: SearchAdd = None, user: User = Depends(get
 
         # Preparing for SQS send and getting Kanji
         cleaned_lyrics = clean_lyrics(lyrics)
+        if cleaned_lyrics is None:
+            return {"message": "No Japanese lyrics found for this song. Paste the lyrics in."}
         kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
         if not kanji_list:
-            return {"message": "Error! Seems like we can't get the lyrics from the link. Paste the lyrics in."}
+            return {"message": "Error! Seems like we can't get the lyrics from the search. Paste the lyrics in."}
         all_kanji_data = get_all_kanji_data(kanji_list)
 
         # Insert the song data into the global database only if it doesn't already exist
@@ -320,7 +324,11 @@ async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_us
         # song not in global database
         image_url = get_image_from_spotify(artist, title)
         cleaned_lyrics = clean_lyrics(lyrics)
+        if cleaned_lyrics is None:
+            return {"message": "No Japanese lyrics found here. Check your input."}
         kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
+        if not kanji_list:
+            return {"message": "Error! Check your input. No Japanese found in the lyrics."}
         all_kanji_data = get_all_kanji_data(kanji_list)
         
         response = supabase.table("SongData").insert({

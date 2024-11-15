@@ -266,7 +266,8 @@ def get_word_info(word, type="word"):
     except Exception as e:
         return []
     word_info = []
-    for entry in result.entries[:3]: 
+    for entry in result.entries: 
+        # print(f"Processing entry: {entry}")
         common = False
         if type == "particle" and not ("conjunction" in entry.senses[0].pos or "particle" in entry.senses[0].pos):
             continue
@@ -308,7 +309,7 @@ def get_word_info(word, type="word"):
             word_info.append(entry_result)
 
     # print(f"Word info retrieved: {word_info}")
-    return word_info
+    return word_info[:4]
 
 def is_japanese(text):
     # Regex to match Hiragana, Katakana, Kanji, and Japanese punctuation
@@ -436,14 +437,14 @@ def process_tokenized_lines(lines):
                 word_info = get_word_info(noun.surface + suffix.surface)
                 if len(word_info) > 0:
                     # the combined word exists.
-                    word_dict[noun.surface + suffix.surface] = word_info
                     composite_word_data = word_info
                     full_word_data = {
-                        "root": None,
-                        "suffixes": None,
+                        "root": word_dict[noun.surface]["composite"],
+                        "suffixes": word_dict[noun.surface]["suffixes"],
                         "composite": composite_word_data
                     }
-                    
+                    word_dict[noun.surface + suffix.surface] = full_word_data
+                    new_line.pop()
                     new_line.append(noun.surface + suffix.surface)
                 elif suffix.surface in SUFFIX_DICT:
                     # the suffix is a known suffix
@@ -478,28 +479,29 @@ def process_tokenized_lines(lines):
                         new_line.append(suffix.surface)
                 pos += 1
             elif word.feature.pos1 == '助詞':  # Particle detection
-                if word.surface == 'は':
-                    temp_list = []
-                    temp_properties = {'pos': ["Particle"], 'definition': ['topic marker']}
-                    temp_list.append({
-                        "idseq": "none",
-                        "word": word.surface,
-                        "furigana": "は",
-                        "romaji": "ha",
-                        "definitions": temp_properties
-                    })
+                # print(f"Processing particle: {word.surface}")
+                # if word.surface == 'は':
+                #     temp_list = []
+                #     temp_properties = {'pos': ["Particle"], 'definition': ['topic marker']}
+                #     temp_list.append({
+                #         "idseq": "none",
+                #         "word": word.surface,
+                #         "furigana": "は",
+                #         "romaji": "ha",
+                #         "definitions": temp_properties
+                #     })
                     
-                    full_word_data = {
-                        "root": None,
-                        "suffixes": None,
-                        "composite": temp_list
-                    }
-                    word_dict[word.surface] = full_word_data
-                    new_line.append(word.surface)
-                    pos += 1
-                    continue
+                #     full_word_data = {
+                #         "root": None,
+                #         "suffixes": None,
+                #         "composite": temp_list
+                #     }
+                #     word_dict[word.surface] = full_word_data
+                #     new_line.append(word.surface)
+                #     pos += 1
+                #     continue
                 word_info = get_word_info(word.surface, type="particle")
-                
+                # print(f"Particle info retrieved: {word_info}")
                 if len(word_info) > 0:
                     full_word_data = {
                         "root": None,
@@ -698,7 +700,11 @@ def lambda_handler(event, context):
 # """
 
 # cleaned_lyrics = """
-# もう悲しくない人は慣れない生き物だから
+# やり残した鼓動が この夜を覆って
+# 僕らを包んで 粉々になる前に
+# 頼りなくてもいい その手を
+# この手は 自分自身のものさ
+# 変わらないはずはないよ 手を伸ばして
 # """
 # lines = split_into_lines(cleaned_lyrics)
 # checked_lines = dakuten_check(lines)
@@ -708,9 +714,10 @@ def lambda_handler(event, context):
 # print(word_mapping)
 # print(lyrics)
 
-# 散らかったそれを鞄に詰め込んだ
-# やっぱり僕はあなたの前の僕は
-# 渡したい言葉なんて渡せないまま
+
+# やり残した鼓動が この夜を覆って
+
+
 
 # pipe to a file
 # with open("word_mapping.json", "w") as f:
