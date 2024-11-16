@@ -73,46 +73,73 @@ async def get_song_from_spotify(uri):
     return artist, song, image
 
 def get_image_from_spotify(artist, title):
+    # print("Artist: ", artist)
+    # print("Title: ", title)
     query = f"track:{title} artist:{artist}"
     track = sp.search(q=query, limit=1, offset=0, type="track", market="JP")
     return track['tracks']['items'][0]['album']['images'][0]['url']
 
 def get_lyrics(artist, title):
+    # print("Artist: ", artist)
+    # print("Title: ", title)
     songs = genius_search.search(title)
+    # print("Songs with this artist and title: ", songs)
+    # pipe to a file
+    # with open("songs.json", "w") as f:
+    #     f.write(str(songs))
     id = None
     for track in songs:
+        print("Track: ", track)
         if artist in track.artist.name:
             id = track.id
             break
     lyrics = None
     if id is not None:
         other_source = genius.search_song(song_id=id)
+        # print("Primary source: ", other_source)
         lyrics = other_source.lyrics  
     else:
         #desperate times...
         other_source = genius.search_song(title, artist)
+        # print("Other source: ", other_source)
         lyrics = other_source.lyrics
         
-    print(lyrics)
+    # print(lyrics)
     return lyrics
-    
 
-def delete_before_line_break(s):
-    index = s.find('\n')  # Find the position of the first line break
-    if index != -1:  # If a line break is found
-        return s[index + 2:]  # Slice the string from the position after the line break, and roll over to the next line
-    else:
-        return s  # If no line break is found, return the original string
+def delete_before_line_break(s, artist):
+    # Extract Japanese characters from artist name
+    artist_japanese = ''.join(re.findall(ALL_JAPANESE, artist))
+    
+    # Find the position of the first and second line breaks
+    first_break = s.find('\n')
+    if first_break != -1:
+        first_line = s[:first_break]  # Get the first line to check
+        
+        # Check if 'lyrics' appears in the first line and remove up to 'lyrics'
+        lyrics_pos = first_line.lower().find('lyrics')
+        if lyrics_pos != -1:
+            s = s[lyrics_pos + len('lyrics'):]  # Remove text up to and including 'lyrics'
+            first_break = s.find('\n')  # Recalculate first line break after 'lyrics' removal
+        
+        # If artist's Japanese name is in the first line, proceed to remove it
+        elif artist_japanese in first_line:
+            second_break = s.find('\n', first_break + 1)
+            if second_break != -1:
+                return s[second_break + 1:]
+    return s  # If conditions aren't met, return the original string
+
 
 #clean up common excess data brought in using the API.
-def clean_lyrics(lyrics):
-    lyrics = delete_before_line_break(lyrics)
+def clean_lyrics(lyrics, artist):
+    lyrics = delete_before_line_break(lyrics, artist)
     # Remove "You might also like" text only
     lyrics = re.sub(r'You might also like', '', lyrics)
     # Remove "number followed by Embed"
     lyrics = re.sub(r'\d+Embed', '', lyrics)
     lyrics = re.sub(r'Embed', '', lyrics)
     if bool(re.search(ALL_JAPANESE, lyrics)):
+        # print("Cleaned lyrics", lyrics)
         return lyrics
     else:
         return None
@@ -187,13 +214,20 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
         return {"message": "Missing information. Please try again."}
     artist, song, image = await get_song_from_spotify(uri)
     # Check if the song already exists in the user's personal song table
+    temp_artist = '%'+artist+'%'
+    temp_song = '%'+song+'%'
     in_my_table = supabase.table("Song").select(count="exact").eq("title", song).eq("artist", artist).eq("id", user.id).execute().count
     if in_my_table:
         return {"message": "Song already in database for this user."}
 
     # Check if the song exists in the global SongData table
-    in_table = supabase.table("SongData").select(count="exact").eq("title", song).eq("artist", artist).execute().count
-    if not in_table:
+    # in_table = supabase.table("SongData").select(count="exact").eq("title", song).eq("artist", artist).execute().count
+    
+    in_table = supabase.table("SongData").select(count="exact").ilike("title", temp_song).ilike("artist", temp_artist).execute()
+    # print("Artist", artist)
+    # print("Song", song)
+    # print("In table", in_table)
+    if not in_table.count:
         # Retrieve song data if it exists
         lyrics = get_lyrics(artist, song)
         
@@ -201,7 +235,7 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
             return {"message": "No lyrics found for this song."}
 
         # Preparing for SQS send and getting Kanji
-        cleaned_lyrics = clean_lyrics(lyrics)
+        cleaned_lyrics = clean_lyrics(lyrics, artist)
         if cleaned_lyrics is None:
             return {"message": "No Japanese lyrics found for this song. Try searching for the song manually."}
         kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
@@ -210,7 +244,8 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
         all_kanji_data = get_all_kanji_data(kanji_list)
 
         # Insert the song data into the global database only if it doesn't already exist
-        response = supabase.table("SongData").insert({
+        try:
+            response = supabase.table("SongData").insert({
             "title": song, 
             "artist": artist, 
             "lyrics": None, 
@@ -218,7 +253,9 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
             "word_mapping": None, 
             "kanji_data": all_kanji_data, 
             "image_url": image
-        }).execute()
+            }).execute()
+        except Exception as e:
+            return {"message": f"An error occurred while inserting the song data: {str(e)}"}
         
         # send to SQS
         body = {
@@ -236,8 +273,9 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
 
     # Song has been successfully added to the global database, now add for the specific user
     response = supabase.table("Song").insert({"title": song, "artist": artist, "id": user.id}).execute()
-    print(response)
-    return response
+    # print(response)
+    return {"message": "Song added successfully.", "status": "success"}
+
 
 #need a route which takes in artist and title, searches, and adds the processed song to the database.
 @router.post("/add-song-search")
@@ -265,7 +303,7 @@ async def add_song_search(searchItem: SearchAdd = None, user: User = Depends(get
         image_url = get_image_from_spotify(artist, title)
 
         # Preparing for SQS send and getting Kanji
-        cleaned_lyrics = clean_lyrics(lyrics)
+        cleaned_lyrics = clean_lyrics(lyrics, artist)
         if cleaned_lyrics is None:
             return {"message": "No Japanese lyrics found for this song. Paste the lyrics in."}
         kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
@@ -273,8 +311,9 @@ async def add_song_search(searchItem: SearchAdd = None, user: User = Depends(get
             return {"message": "Error! Seems like we can't get the lyrics from the search. Paste the lyrics in."}
         all_kanji_data = get_all_kanji_data(kanji_list)
 
-        # Insert the song data into the global database only if it doesn't already exist
-        response = supabase.table("SongData").insert({
+        # Insert the song data into the global database only if it doesn't already exist        
+        try:
+            response = supabase.table("SongData").insert({
             "title": title, 
             "artist": artist, 
             "lyrics": None, 
@@ -282,7 +321,9 @@ async def add_song_search(searchItem: SearchAdd = None, user: User = Depends(get
             "word_mapping": None, 
             "kanji_data": all_kanji_data, 
             "image_url": image_url
-        }).execute()
+            }).execute()
+        except Exception as e:
+            return {"message": f"An error occurred while inserting the song data: {str(e)}"}
         
         # send to SQS
         body = {
@@ -300,7 +341,7 @@ async def add_song_search(searchItem: SearchAdd = None, user: User = Depends(get
 
     # Song has been successfully added to the global database, now add for the specific user
     response = supabase.table("Song").insert({"title": title, "artist": artist, "id": user.id}).execute()
-    print(response)
+    # print(response)
     return {"message": "Song added successfully.", "status": "success"}
   
     
@@ -323,7 +364,7 @@ async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_us
     if not in_table:
         # song not in global database
         image_url = get_image_from_spotify(artist, title)
-        cleaned_lyrics = clean_lyrics(lyrics)
+        cleaned_lyrics = clean_lyrics(lyrics, artist)
         if cleaned_lyrics is None:
             return {"message": "No Japanese lyrics found here. Check your input."}
         kanji_list = extract_unicode_block(CONST_KANJI, cleaned_lyrics)
@@ -331,7 +372,8 @@ async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_us
             return {"message": "Error! Check your input. No Japanese found in the lyrics."}
         all_kanji_data = get_all_kanji_data(kanji_list)
         
-        response = supabase.table("SongData").insert({
+        try:
+            response = supabase.table("SongData").insert({
             "title": title, 
             "artist": artist, 
             "lyrics": None, 
@@ -339,10 +381,12 @@ async def add_song_manual(manual: ManualAdd, user: User = Depends(get_current_us
             "word_mapping": None, 
             "kanji_data": all_kanji_data, 
             "image_url": image_url
-        }).execute()
-        # call long running SQS to process tokenized lines and add it to the database
+            }).execute()
+        except Exception as e:
+            return {"message": f"An error occurred while inserting the song data: {str(e)}"}
         
-         # send to SQS
+        # call long running SQS to process tokenized lines and add it to the database
+        # send to SQS
         body = {
             "song": title,
             "artist": artist,
