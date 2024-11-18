@@ -110,6 +110,7 @@ AUXILIARIES = {
     'ちゃ': 'てしまう, casual',
     'せる': 'causative',
     'せ': 'causative',
+    'って': 'they said',
 }
 
 SUFFIX_DICT = {
@@ -127,6 +128,8 @@ SUFFIX_DICT = {
     "所": "suffix meaning 'place' or 'location', often used in nouns to denote a specific location",
     "式": "suffix meaning 'style' or 'system', used in nouns to denote a particular method or system",
 }
+
+ADDITIONAL_SUFFIXES = ['さ', 'って']
 
 # Mapping of basic hiragana/katakana to their dakuten and handakuten equivalents
 DAKUTEN_MAP = {
@@ -362,16 +365,16 @@ def process_tokenized_lines(lines):
                 pos += 1
                 continue
 
-            print(f"Processing word: {word.surface}, Lemma: {word.feature.lemma}, POS1: {word.feature.pos1}")
+            # print(f"Processing word: {word.surface}, Lemma: {word.feature.lemma}, POS1: {word.feature.pos1}")
             
             # Verbs, adjectives, adjectival nouns.
             if (word.feature.pos1 == '動詞' 
                 or word.feature.pos1 == '形容詞' 
                 or (word.feature.pos1 == '名詞' and word.feature.pos3 == '形状詞可能')
                 or word.feature.pos1 == '形状詞'
-                or word.feature.pos1 == '形容詞' or word.feature.pos1 == '助動詞'):
-                
-                
+                or word.feature.pos1 == '形容詞' or word.feature.pos1 == '助動詞'
+                or word.feature.pos1 == '代名詞'
+                or word.feature.pos1 == '副詞'):
                 #retrieve definition from dictionary.
                 word_info = get_word_info(word.feature.lemma)
                 for info in word_info:
@@ -395,8 +398,9 @@ def process_tokenized_lines(lines):
                 pos += 1
                 suffix_data = []
                 #continue through the line to check for auxiliaries. 
-                while pos < len(line) and ((line[pos].surface in AUXILIARIES and line[pos].feature.pos1 == '助動詞') or line[pos].feature.pos1 == '接尾辞' or line[pos].surface in ['て', 'で', 'ん','ちゃ']):
+                while pos < len(line) and ((line[pos].surface in AUXILIARIES and line[pos].feature.pos1 == '助動詞') or line[pos].feature.pos1 == '接尾辞' or line[pos].surface in ['て', 'で', 'ん','ちゃ', 'って', 'さ']):
                     # we have found a bound auxiliary. Need to reflect in main verb's definitions, furigana, and romaji
+                    # print(f"Processing auxiliary: {line[pos].surface}, Lemma: {line[pos].feature.lemma}, POS1: {line[pos].feature.pos1}")
                     aux_word = line[pos]
                     final_word += aux_word.surface
                     aux_furigana = conv.do(aux_word.surface)
@@ -623,96 +627,94 @@ def lambda_handler(event, context):
 
 
 
-# cleaned_lyrics = """[Intro]
-# 未熟
-# 無ジョウ
-# されど
-# 美しくあれ
+cleaned_lyrics = """[Intro]
+未熟
+無ジョウ
+されど
+美しくあれ
 
-# [Verse 1]
-# No destiny ふさわしく無い
-# こんなんじゃきっと物足りない
-# くらい語っとけばうまくいく
-# 物, 金, 愛, 言, もう自己顕示飽きた
-# 既視感[デジャヴ]何がそんな不満なんだ?
-# 散々ワガママ語っといて これ以上他に何がいる?
-# そんなところも割と嫌いじゃ無い
+[Verse 1]
+No destiny ふさわしく無い
+こんなんじゃきっと物足りない
+くらい語っとけばうまくいく
+物, 金, 愛, 言, もう自己顕示飽きた
+既視感[デジャヴ]何がそんな不満なんだ?
+散々ワガママ語っといて これ以上他に何がいる?
+そんなところも割と嫌いじゃ無い
 
-# [Pre-Chorus]
-# もう「聞き飽きたんだよ, そのセリフ」
-# 中途半端だけは嫌
+[Pre-Chorus]
+もう「聞き飽きたんだよ, そのセリフ」
+中途半端だけは嫌
 
-# [Chorus]
-# もういい
-# ああしてこうして言ってたって
-# 愛して どうして? 言われたって
-# 遊びだけなら簡単で 真剣交渉無茶苦茶で
-# 思いもしない軽[おも]い言葉
-# 何度使い古すのか?
-# どうせ
-# 期待してたんだ出来レースでも
-# 引用だらけのフレーズも
-# 踵持ち上がる言葉タブーにして
-# 空気を読んだ雨降らないでよ
+[Chorus]
+もういい
+ああしてこうして言ってたって
+愛して どうして? 言われたって
+遊びだけなら簡単で 真剣交渉無茶苦茶で
+思いもしない軽[おも]い言葉
+何度使い古すのか?
+どうせ
+期待してたんだ出来レースでも
+引用だらけのフレーズも
+踵持ち上がる言葉タブーにして
+空気を読んだ雨降らないでよ
 
-# [Verse 2]
-# まどろっこしい話は嫌
-# 必要最低限でいい 2文字以内でどうぞ
-# 紅の蝶は何のメールも送らない
-# 脆い扇子広げる その方が魅力的でしょう
+[Verse 2]
+まどろっこしい話は嫌
+必要最低限でいい 2文字以内でどうぞ
+紅の蝶は何のメールも送らない
+脆い扇子広げる その方が魅力的でしょう
 
-# [Chorus]
-# 迷で
-# 応えられないなら ほっといてくれ
-# 迷えるくらいなら 去っといてくれ
-# 肝心なとこは筒抜けで
-# 安心だけはさせられるような
-# 甘いあめが降れば
-# 傘もさしたくなるだろう?
-# このまま
-# 期待したままでよかった 目を瞑った
-# 変えたかった 大人ぶった
-# 無くした 巻き戻せなかった
-# 今雨, 止まないで
+[Chorus]
+迷で
+応えられないなら ほっといてくれ
+迷えるくらいなら 去っといてくれ
+肝心なとこは筒抜けで
+安心だけはさせられるような
+甘いあめが降れば
+傘もさしたくなるだろう?
+このまま
+期待したままでよかった 目を瞑った
+変えたかった 大人ぶった
+無くした 巻き戻せなかった
+今雨, 止まないで
 
-# [Bridge]
-# コピー, ペースト, デリート その繰り返し
-# 吸って, 吐いた
-# だから
-# それでもいいからさ 此処いたいよ
+[Bridge]
+コピー, ペースト, デリート その繰り返し
+吸って, 吐いた
+だから
+それでもいいからさ 此処いたいよ
 
-# [Chorus]
-# もういい
-# ああしてこうして言ってたって
-# 愛して どうして? 言われたって
-# 遊びだけなら簡単で 真剣交渉支離滅裂で
-# 思いもしない重い真実[うそ]は
-# タブーにしなくちゃな?
-# きっと
-# 期待してたんだ出来レースでも
-# 公式通りのフレーズも
-# 踵上がる癖もう終わりにして
-# 空気を読んだ空晴れないでよ
+[Chorus]
+もういい
+ああしてこうして言ってたって
+愛して どうして? 言われたって
+遊びだけなら簡単で 真剣交渉支離滅裂で
+思いもしない重い真実[うそ]は
+タブーにしなくちゃな?
+きっと
+期待してたんだ出来レースでも
+公式通りのフレーズも
+踵上がる癖もう終わりにして
+空気を読んだ空晴れないでよ
 
-# [Outro]
-# 今日も, 雨
-# 傘を閉じて 濡れて帰ろうよ
-# """
+[Outro]
+今日も, 雨
+傘を閉じて 濡れて帰ろうよ
+"""
 
 # cleaned_lyrics = """
-# やり残した鼓動が この夜を覆って
-# 僕らを包んで 粉々になる前に
-# 頼りなくてもいい その手を
-# この手は 自分自身のものさ
-# 変わらないはずはないよ 手を伸ばして
+# そうさ
 # """
-# lines = split_into_lines(cleaned_lyrics)
-# checked_lines = dakuten_check(lines)
-# tokenized_lines = tokenize(checked_lines)
-# word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
-# hiragana_lines = convert_to_hiragana(lyrics)
-# print(word_mapping)
-# print(lyrics)
+lines = split_into_lines(cleaned_lyrics)
+checked_lines = dakuten_check(lines)
+tokenized_lines = tokenize(checked_lines)
+word_mapping, lyrics = process_tokenized_lines(tokenized_lines)
+hiragana_lines = convert_to_hiragana(lyrics)
+print(word_mapping)
+print(lyrics)
+
+# print(get_word_info("そうさ"))
 
 
 # やり残した鼓動が この夜を覆って
