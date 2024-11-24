@@ -373,7 +373,6 @@ def process_tokenized_lines(lines):
                 or (word.feature.pos1 == '名詞' and word.feature.pos3 == '形状詞可能')
                 or word.feature.pos1 == '形状詞'
                 or word.feature.pos1 == '形容詞' or word.feature.pos1 == '助動詞'
-                or word.feature.pos1 == '代名詞'
                 or word.feature.pos1 == '副詞'):
                 #retrieve definition from dictionary.
                 word_info = get_word_info(word.feature.lemma)
@@ -704,7 +703,7 @@ def lambda_handler(event, context):
 # """
 
 # cleaned_lyrics = """
-# そうさ
+# 君
 # """
 # lines = split_into_lines(cleaned_lyrics)
 # checked_lines = dakuten_check(lines)

@@ -20,6 +20,7 @@ boto3 = "*"
 python-dotenv = "*"
 python-multipart = "*"
 geniusdotpy = "*"
+romkan = "*"
 
 [dev-packages]
 
