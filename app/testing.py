@@ -10,7 +10,22 @@ USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36"
 ]
-genius = Genius("8vBphHXB7yhgAb7l1t6pSgDF4pp8KpTfzSvKiRGSeZ0g3gLel39ZJ21Tyjhw43uC", user_agent=random.choice(USER_AGENTS))
+
+proxy_list_http = [
+    "http://51.222.32.193:3128",
+    "http://63.143.57.115:80",
+    "http://135.148.149.92:3128",
+]
+
+proxy_list_https = [
+    "https://191.37.33.38:42999",
+    "https://62.60.229.100:3128",
+    "https://103.90.234.132:8888"
+]
+proxy = {
+    "http": random.choice(proxy_list_http)
+}
+genius = Genius("8vBphHXB7yhgAb7l1t6pSgDF4pp8KpTfzSvKiRGSeZ0g3gLel39ZJ21Tyjhw43uC", user_agent=random.choice(USER_AGENTS), proxy=proxy)
 genius_search = GeniusSearch(client_access_token="8vBphHXB7yhgAb7l1t6pSgDF4pp8KpTfzSvKiRGSeZ0g3gLel39ZJ21Tyjhw43uC")
 genius_search.excluded_terms = ["Romanized", "English", "Translation", "Türkçe", "Português"]
 

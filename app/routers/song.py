@@ -42,10 +42,18 @@ USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36"
 ]
+proxy_list_http = [
+    "http://51.222.32.193:3128",
+    "http://63.143.57.115:80",
+    "http://135.148.149.92:3128",
+]
+proxy = {
+    "http": random.choice(proxy_list_http)
+}
 
 client_credentials_manager = SpotifyClientCredentials(client_id=cid, client_secret=secret)
 sp = spotipy.Spotify(client_credentials_manager = client_credentials_manager)
-genius = Genius(genius_token, user_agent=random.choice(USER_AGENTS))
+genius = Genius(genius_token, user_agent=random.choice(USER_AGENTS), proxy=proxy)
 genius_search = GeniusSearch(client_access_token=genius_token)
 genius_search.excluded_terms = ["Romanized", "English", "Translation", "Türkçe", "Português"]
 
