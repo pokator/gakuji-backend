@@ -21,6 +21,7 @@ python-multipart = "*"
 geniusdotpy = "*"
 romkan = "*"
 lyricsgenius = {git = "git+https://github.com/johnwmillr/LyricsGenius.git"}
+uvicorn = "*"
 
 [dev-packages]
 
