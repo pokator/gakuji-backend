@@ -34,26 +34,25 @@ cid = os.getenv("SPOTIFY_CLIENT_ID")
 secret = os.getenv("SPOTIFY_CLIENT_SECRET")
 genius_token = os.getenv("GENIUS_ACCESS_TOKEN")
 
-#initialize genius related objects
-USER_AGENTS = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36"
-]
-proxy_list_http = [
-    "http://51.222.32.193:3128",
-    "http://63.143.57.115:80",
-    "http://135.148.149.92:3128",
-]
-proxy = {
-    "http": random.choice(proxy_list_http)
-}
+# #initialize genius related objects
+# USER_AGENTS = [
+#     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+#     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36",
+#     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36",
+#     "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+#     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36"
+# ]
+# proxy_list_http = [
+#     "http://51.222.32.193:3128",
+#     "http://63.143.57.115:80",
+#     "http://135.148.149.92:3128",
+# ]
+# proxy = {
+#     "http": random.choice(proxy_list_http)
+# }
 
 client_credentials_manager = SpotifyClientCredentials(client_id=cid, client_secret=secret)
 sp = spotipy.Spotify(client_credentials_manager = client_credentials_manager)
-genius = Genius(genius_token, user_agent=random.choice(USER_AGENTS), proxy=proxy)
 genius_search = GeniusSearch(client_access_token=genius_token)
 genius_search.excluded_terms = ["Romanized", "English", "Translation", "Türkçe", "Português"]
 
@@ -99,7 +98,8 @@ def get_image_from_spotify(artist, title):
     track = sp.search(q=query, limit=1, offset=0, type="track", market="JP")
     return track['tracks']['items'][0]['album']['images'][0]['url']
 
-def get_lyrics(artist, title):
+def get_lyrics(artist, title, user_agent=None):
+    genius = Genius(genius_token, user_agent=user_agent)
     # print("Artist: ", artist)
     # print("Title: ", title)
     songs = genius_search.search(title)
@@ -230,6 +230,7 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
     uri = spotifyItem.uri
     refresh_token = spotifyItem.refresh_token
     access_token = spotifyItem.access_token
+    user_agent = spotifyItem.user_agent
     if spotifyItem is None or user is None:
         return {"message": "Missing information. Please try again."}
     artist, song, image = await get_song_from_spotify(uri)
@@ -249,7 +250,7 @@ async def add_song_spot(spotifyItem: SpotifyAdd = None, user: User = Depends(get
     # print("In table", in_table)
     if not in_table.count:
         # Retrieve song data if it exists
-        lyrics = get_lyrics(artist, song)
+        lyrics = get_lyrics(artist, song, user_agent)
         
         if lyrics is None:
             return {"message": "No lyrics found for this song."}
@@ -304,6 +305,7 @@ async def add_song_search(searchItem: SearchAdd = None, user: User = Depends(get
     access_token = searchItem.access_token
     artist = searchItem.artist
     title = searchItem.title
+    user_agent = searchItem.user_agent
     if searchItem is None or user is None:
         return {"message": "Missing information. Please try again."}
     # Check if the song already exists in the user's personal song table
@@ -315,7 +317,7 @@ async def add_song_search(searchItem: SearchAdd = None, user: User = Depends(get
     in_table = supabase.table("SongData").select(count="exact").eq("title", title).eq("artist", artist).execute().count
     if not in_table:
         # Retrieve song data if it exists
-        lyrics = get_lyrics(artist, title)
+        lyrics = get_lyrics(artist, title, user_agent)
         
         if lyrics is None:
             return {"message": "No lyrics found for this song."}
