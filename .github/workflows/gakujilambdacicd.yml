@@ -41,12 +41,12 @@ jobs:
       - name: Push Docker image
         run: docker push 533267207624.dkr.ecr.us-east-2.amazonaws.com/gakuji-api:latest
 
-      - name: Build Docker Image for process-lines
-        run: docker build -t process-lines ./longRunningFunction
-      - name: Tag Docker image for process-lines
-        run: docker tag process-lines:latest 533267207624.dkr.ecr.us-east-2.amazonaws.com/process-lines:latest
-      - name: Push Docker image for process-lines
-        run: docker push 533267207624.dkr.ecr.us-east-2.amazonaws.com/process-lines:latest
+      # - name: Build Docker Image for process-lines
+      #   run: docker build -t process-lines ./longRunningFunction
+      # - name: Tag Docker image for process-lines
+      #   run: docker tag process-lines:latest 533267207624.dkr.ecr.us-east-2.amazonaws.com/process-lines:latest
+      # - name: Push Docker image for process-lines
+      #   run: docker push 533267207624.dkr.ecr.us-east-2.amazonaws.com/process-lines:latest
 
 
       - name: Update Lambda function code
@@ -56,12 +56,12 @@ jobs:
             --image-uri 533267207624.dkr.ecr.us-east-2.amazonaws.com/gakuji-api:latest \
             --region "us-east-2"
 
-      - name: Update process-lines Lambda function code
-        run: |
-          aws lambda update-function-code \
-          --function-name process_lines \
-          --image-uri 533267207624.dkr.ecr.us-east-2.amazonaws.com/process-lines:latest  \
-          --region "us-east-2"
+      # - name: Update process-lines Lambda function code
+      #   run: |
+      #     aws lambda update-function-code \
+      #     --function-name process_lines \
+      #     --image-uri 533267207624.dkr.ecr.us-east-2.amazonaws.com/process-lines:latest  \
+      #     --region "us-east-2"
 
       - name: Wait for lambda to complete update
         run: bash ./scripts/wait_for_lambda.sh gakuji-api
