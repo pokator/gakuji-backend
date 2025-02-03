@@ -1,11 +1,10 @@
 from fastapi import Body, Depends, status, HTTPException, APIRouter
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 from db.supabase import create_supabase_client
 from app.dbmodels import User
-from app.models import Token, CreateUser, SpotifyAdd, ManualAdd, SearchAdd
+from app.models import SpotifyAdd, ManualAdd, SearchAdd
 from dotenv import load_dotenv
 import os
-from typing import Union
 from lyricsgenius import Genius
 from geniusdotpy.genius import Genius as GeniusSearch 
 import spotipy
@@ -18,6 +17,7 @@ import pykakasi
 import json
 from app.routers.auth import get_current_user, get_current_session
 import boto3
+import random
 
 router = APIRouter(prefix="/song", tags=["song"])
 load_dotenv()
@@ -34,12 +34,22 @@ cid = os.getenv("SPOTIFY_CLIENT_ID")
 secret = os.getenv("SPOTIFY_CLIENT_SECRET")
 genius_token = os.getenv("GENIUS_ACCESS_TOKEN")
 
+#initialize genius related objects
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36"
+]
+
 client_credentials_manager = SpotifyClientCredentials(client_id=cid, client_secret=secret)
 sp = spotipy.Spotify(client_credentials_manager = client_credentials_manager)
-genius = Genius(genius_token, user_agent="Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.3")
-
+genius = Genius(genius_token, user_agent=random.choice(USER_AGENTS))
 genius_search = GeniusSearch(client_access_token=genius_token)
 genius_search.excluded_terms = ["Romanized", "English", "Translation", "Türkçe", "Português"]
+
+#initialize tokenizing/japanese processing objects
 jam = Jamdict(memory_mode=True)
 tagger = fugashi.Tagger()
 kakasi = pykakasi.kakasi()
@@ -52,12 +62,14 @@ HIRAGANA_FULL = r'[ぁ-ゟ]'
 KATAKANA_FULL = r'[゠-ヿ]'
 ALL_JAPANESE = f'{CONST_KANJI}|{HIRAGANA_FULL}|{KATAKANA_FULL}'
 
+#initialize AWS objects
 aws_session = boto3.Session(
     aws_access_key_id=os.getenv("AWS_SERVER_PUBLIC_KEY"),
     aws_secret_access_key=os.getenv("AWS_SERVER_SECRET_KEY"),
     region_name="us-east-2"
 )
 
+#load kanji data
 def load_kanji_data(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         return json.load(file)

@@ -1,10 +1,20 @@
 from lyricsgenius import Genius
 from geniusdotpy.genius import Genius as GeniusSearch 
+import random
 
-genius = Genius("8vBphHXB7yhgAb7l1t6pSgDF4pp8KpTfzSvKiRGSeZ0g3gLel39ZJ21Tyjhw43uC", user_agent="Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.3")
 
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36"
+]
+genius = Genius("8vBphHXB7yhgAb7l1t6pSgDF4pp8KpTfzSvKiRGSeZ0g3gLel39ZJ21Tyjhw43uC", user_agent=random.choice(USER_AGENTS))
 genius_search = GeniusSearch(client_access_token="8vBphHXB7yhgAb7l1t6pSgDF4pp8KpTfzSvKiRGSeZ0g3gLel39ZJ21Tyjhw43uC")
 genius_search.excluded_terms = ["Romanized", "English", "Translation", "Türkçe", "Português"]
+
+
 
 def get_lyrics(artist, title):
     # print("Artist: ", artist)
@@ -19,6 +29,7 @@ def get_lyrics(artist, title):
         print("Track: ", track)
         if artist in track.artist.name:
             id = track.id
+            url = track.url
             break
     lyrics = None
     if id is not None:
@@ -31,6 +42,9 @@ def get_lyrics(artist, title):
         # print("Other source: ", other_source)
         lyrics = other_source.lyrics
         
+    if url is not None:
+        other_source = genius.web_page(url)
+        print("Web page: ", other_source)
     # print(lyrics)
     return lyrics
 
