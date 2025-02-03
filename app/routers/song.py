@@ -18,6 +18,13 @@ import json
 from app.routers.auth import get_current_user, get_current_session
 import boto3
 import random
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 
 router = APIRouter(prefix="/song", tags=["song"])
 load_dotenv()
@@ -42,14 +49,14 @@ genius_token = os.getenv("GENIUS_ACCESS_TOKEN")
 #     "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
 #     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36"
 # ]
-# proxy_list_http = [
-#     "http://51.222.32.193:3128",
-#     "http://63.143.57.115:80",
-#     "http://135.148.149.92:3128",
-# ]
-# proxy = {
-#     "http": random.choice(proxy_list_http)
-# }
+proxy_list_http = [
+    "http://51.222.32.193:3128",
+    "http://63.143.57.115:80",
+    "http://135.148.149.92:3128",
+]
+proxy = {
+    "http": random.choice(proxy_list_http)
+}
 
 client_credentials_manager = SpotifyClientCredentials(client_id=cid, client_secret=secret)
 sp = spotipy.Spotify(client_credentials_manager = client_credentials_manager)
@@ -98,8 +105,47 @@ def get_image_from_spotify(artist, title):
     track = sp.search(q=query, limit=1, offset=0, type="track", market="JP")
     return track['tracks']['items'][0]['album']['images'][0]['url']
 
-def get_lyrics(artist, title, user_agent=None):
-    genius = Genius(genius_token, user_agent=user_agent)
+def scrape_lyrics_with_selenium(url, user_agent):
+    """Scrape lyrics from Genius using Selenium."""
+    
+    options = Options()
+    options.add_argument("--headless")  # Run in headless mode
+    options.add_argument(f"user-agent={user_agent}")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--disable-infobars")
+    options.add_argument("--disable-extensions")
+    
+    # 🚀 **Speed Boost: Block images & scripts**  
+    options.add_argument("--blink-settings=imagesEnabled=false")
+    options.add_experimental_option("prefs", {
+        "profile.managed_default_content_settings.images": 2,  # Disable images
+        "profile.managed_default_content_settings.stylesheets": 2,  # Disable CSS
+        "profile.managed_default_content_settings.javascript": 1,  # Keep JS enabled
+    })
+    
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=options)
+    
+    try:
+        driver.get(url) # Allow page to load
+
+        # Find all divs where data-lyrics-container="true"
+        lyrics_elements = WebDriverWait(driver, 5).until(
+            EC.presence_of_all_elements_located((By.XPATH, '//div[@data-lyrics-container="true"]'))
+        )
+
+        lyrics = "\n".join([elem.text for elem in lyrics_elements if elem.text.strip()])
+        return lyrics
+
+    except Exception as e:
+        print("Error scraping lyrics:", e)
+        return None
+
+    finally:
+        driver.quit()
+
+def get_lyrics(artist, title, user_agent):
+    genius = Genius(genius_token, user_agent=user_agent, proxy=proxy)
     # print("Artist: ", artist)
     # print("Title: ", title)
     songs = genius_search.search(title)
@@ -108,21 +154,26 @@ def get_lyrics(artist, title, user_agent=None):
     # with open("songs.json", "w") as f:
     #     f.write(str(songs))
     id = None
+    url = None
+
     for track in songs:
-        print("Track: ", track)
         if artist in track.artist.name:
-            id = track.id
+            song_id = track.id
+            url = track.url
             break
+
     lyrics = None
-    if id is not None:
-        other_source = genius.search_song(song_id=id)
+    if url is not None:
+        # other_source = genius.search_song(song_id=id)
         # print("Primary source: ", other_source)
-        lyrics = other_source.lyrics  
+        lyrics = scrape_lyrics_with_selenium(url, user_agent)
+        # lyrics = other_source.lyrics  
     else:
         #desperate times...
         other_source = genius.search_song(title, artist)
+        lyrics = scrape_lyrics_with_selenium(other_source.url, user_agent)
         # print("Other source: ", other_source)
-        lyrics = other_source.lyrics
+        # lyrics = other_source.lyrics
         
     # print(lyrics)
     return lyrics

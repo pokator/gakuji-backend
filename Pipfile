@@ -22,6 +22,10 @@ geniusdotpy = "*"
 romkan = "*"
 lyricsgenius = {git = "git+https://github.com/johnwmillr/LyricsGenius.git"}
 uvicorn = "*"
+selenium = "*"
+webdriver-manager = "*"
+beautifulsoup4 = "*"
+requests = "*"
 
 [dev-packages]
 
