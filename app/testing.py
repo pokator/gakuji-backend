@@ -1,7 +1,7 @@
 from lyricsgenius import Genius
 from geniusdotpy.genius import Genius as GeniusSearch 
 
-genius = Genius("8vBphHXB7yhgAb7l1t6pSgDF4pp8KpTfzSvKiRGSeZ0g3gLel39ZJ21Tyjhw43uC")
+genius = Genius("8vBphHXB7yhgAb7l1t6pSgDF4pp8KpTfzSvKiRGSeZ0g3gLel39ZJ21Tyjhw43uC", user_agent="Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.3")
 
 genius_search = GeniusSearch(client_access_token="8vBphHXB7yhgAb7l1t6pSgDF4pp8KpTfzSvKiRGSeZ0g3gLel39ZJ21Tyjhw43uC")
 genius_search.excluded_terms = ["Romanized", "English", "Translation", "Türkçe", "Português"]

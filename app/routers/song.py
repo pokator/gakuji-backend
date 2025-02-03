@@ -36,7 +36,7 @@ genius_token = os.getenv("GENIUS_ACCESS_TOKEN")
 
 client_credentials_manager = SpotifyClientCredentials(client_id=cid, client_secret=secret)
 sp = spotipy.Spotify(client_credentials_manager = client_credentials_manager)
-genius = Genius(genius_token)
+genius = Genius(genius_token, user_agent="Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.3")
 
 genius_search = GeniusSearch(client_access_token=genius_token)
 genius_search.excluded_terms = ["Romanized", "English", "Translation", "Türkçe", "Português"]
